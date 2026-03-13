@@ -90,6 +90,13 @@
   .legend-item { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
   .legend-swatch { width: 28px; height: 14px; border-radius: 3px; flex-shrink: 0; }
   .legend-name { font-size: 12px; color: var(--white); }
+  .team-row { display:flex; align-items:center; gap:7px; margin-bottom:7px; }
+  .team-color-btn { width:22px; height:22px; border-radius:4px; border:none; cursor:pointer; flex-shrink:0; padding:0; }
+  .team-name-input { flex:1; background:transparent; border:none; color:var(--white); font-size:12px; font-family:'DM Sans',sans-serif; outline:none; min-width:0; }
+  .team-name-input:focus { border-bottom:1px solid #5F9EAF; }
+  .team-del-btn { background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:2px 3px; line-height:1; opacity:0.5; }
+  .team-del-btn:hover { color:#C97B6E; opacity:1; }
+  input[type="color"] { -webkit-appearance:none; appearance:none; }
 
   .edit-panel { background: var(--slate); border-top: 1px solid rgba(255,255,255,0.06); padding: 14px 16px; flex-shrink: 0; }
   .edit-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
@@ -186,8 +193,20 @@
     </div>
 
     <div class="sidebar-body" id="tab-legend" style="display:none">
+      <div class="add-form" style="margin-bottom:14px">
+        <h3>Add Team</h3>
+        <div class="field"><label>Name</label><input type="text" id="new-team-name" placeholder="Team name"></div>
+        <div class="field">
+          <label>Color</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="color" id="new-team-color" value="#7DAE8C" oninput="document.getElementById('new-team-color-hex').value=this.value" style="width:44px;height:32px;padding:2px;border-radius:5px;border:1px solid var(--slate);background:var(--navy-mid);cursor:pointer">
+            <input type="text" id="new-team-color-hex" value="#7DAE8C" placeholder="#rrggbb" style="flex:1" oninput="syncColorFromHex('new')">
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="addTeam()">+ Add Team</button>
+      </div>
       <div class="legend-section">
-        <div class="legend-title">Team Color</div>
+        <div class="legend-title">Teams</div>
         <div id="team-legend"></div>
       </div>
       <div class="legend-section">
@@ -231,7 +250,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const TEAMS = {
+const DEFAULT_TEAMS = {
   multiple:    { color: '#8C9EAD', name: 'Multiple Teams' },
   prodStratDev:{ color: '#7DAE8C', name: 'Prod Strategy (Dev)' },
   devops:      { color: '#5F9EAF', name: 'Dev Ops' },
@@ -245,6 +264,14 @@ const TEAMS = {
   platform:    { color: '#5880C4', name: 'Platform Team' },
   unassigned:  { color: '#BFC6CE', name: 'Unassigned' },
 };
+const TEAMS_KEY = 'longview_teams_v1';
+let TEAMS = (() => {
+  try { const s = localStorage.getItem(TEAMS_KEY); if (s) return JSON.parse(s); } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_TEAMS));
+})();
+function saveTeams() {
+  try { localStorage.setItem(TEAMS_KEY, JSON.stringify(TEAMS)); } catch(e) {}
+}
 const TYPES = {
   acquisition: { label: 'Acquisition',  color: '#8C9EAD' },
   always:      { label: 'Always On',    color: '#3AADA8' },
@@ -343,9 +370,11 @@ function scheduleSave() {
 function resetData() {
   if (!confirm('Reset all projects to the original defaults? This cannot be undone.')) return;
   localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(TEAMS_KEY);
   projects = JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
+  TEAMS = JSON.parse(JSON.stringify(DEFAULT_TEAMS));
   nextId = 42; selectedId = null;
-  closeEditPanel(); renderAll(); saveProjects();
+  closeEditPanel(); populateSelects(); renderAll(); saveProjects(); saveTeams();
   toast('Reset to defaults');
 }
 
@@ -395,10 +424,65 @@ function renderList() {
 }
 
 function renderLegend() {
-  document.getElementById('team-legend').innerHTML = Object.entries(TEAMS).map(([,t]) =>
-    `<div class="legend-item"><div class="legend-swatch" style="background:${t.color}"></div><span class="legend-name">${t.name}</span></div>`).join('');
+  document.getElementById('team-legend').innerHTML = Object.entries(TEAMS).map(([k,t]) => `
+    <div class="team-row">
+      <input type="color" class="team-color-btn" value="${t.color}"
+        oninput="updateTeamColor('${k}',this.value)"
+        title="Click to change color">
+      <input class="team-name-input" value="${t.name}"
+        oninput="updateTeamName('${k}',this.value)"
+        title="Click to rename">
+      <button class="team-del-btn" onclick="deleteTeam('${k}')" title="Delete team">×</button>
+    </div>`).join('');
   document.getElementById('type-legend').innerHTML = Object.entries(TYPES).map(([,t]) =>
     `<div class="legend-item"><div class="legend-swatch" style="background:${t.color};border-radius:10px"></div><span class="legend-name">${t.label}</span></div>`).join('');
+}
+
+function addTeam() {
+  const name  = document.getElementById('new-team-name').value.trim();
+  const color = document.getElementById('new-team-color').value;
+  if (!name) { toast('Enter a team name'); return; }
+  const key = name.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').slice(0,24) + '_' + Date.now().toString(36);
+  TEAMS[key] = { name, color };
+  saveTeams();
+  populateSelects();
+  renderAll();
+  document.getElementById('new-team-name').value = '';
+  toast('Team added');
+}
+
+function updateTeamName(key, value) {
+  if (!TEAMS[key]) return;
+  TEAMS[key].name = value;
+  saveTeams();
+  scheduleSave(); // re-render list + gantt labels
+  renderGantt(); renderList();
+}
+
+function updateTeamColor(key, value) {
+  if (!TEAMS[key]) return;
+  TEAMS[key].color = value;
+  saveTeams();
+  renderGantt(); renderList();
+}
+
+function deleteTeam(key) {
+  const inUse = projects.some(p =>
+    (p.team === key) || (p.segments && p.segments.some(s => s.team === key)));
+  if (inUse) { toast('Team is in use — reassign projects first'); return; }
+  if (!confirm(`Delete team "${TEAMS[key].name}"?`)) return;
+  delete TEAMS[key];
+  saveTeams();
+  populateSelects();
+  renderAll();
+  toast('Team deleted');
+}
+
+function syncColorFromHex(prefix) {
+  const hex = document.getElementById(prefix+'-team-color-hex').value;
+  if (/^#[0-9a-fA-F]{6}$/.test(hex)) {
+    document.getElementById(prefix+'-team-color').value = hex;
+  }
 }
 
 function renderGantt() {
