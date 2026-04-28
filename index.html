@@ -167,7 +167,7 @@ async function loadData() {
   // Use the raw content URL — works for public repos with no auth.
   // For a private repo: swap this for a /api/data Vercel serverless
   // function that injects a read-only PAT from process.env.
-  const url = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_PATH}`;
+  const url = `/api/data`;
 
   try {
     const res = await fetch(url + '?t=' + Date.now()); // bust CDN cache
