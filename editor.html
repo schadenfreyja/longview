@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Long View Portfolio Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:      #16202E;
+    --navy-mid:  #1E2D3F;
+    --slate:     #2D3E50;
+    --mid:       #546070;
+    --muted:     #8A9BAE;
+    --rule:      #D8DDE3;
+    --light:     #F3F5F7;
+    --offwhite:  #EAEEF2;
+    --white:     #FFFFFF;
+    --text:      #2D3E50;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--navy); color: var(--text); min-height: 100vh; }
+
+  header {
+    background: var(--navy-mid); border-bottom: 1px solid var(--slate);
+    padding: 0 24px; height: 52px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  }
+  .logo { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--white); letter-spacing: 0.04em; }
+  .logo span { color: var(--muted); }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .save-indicator { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.05em; transition: color 0.3s; }
+  .save-indicator.saved { color: #7DAE8C; }
+  .publish-indicator { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.05em; transition: color 0.3s; }
+  .publish-indicator.unpublished { color: #D49060; }
+  .publish-indicator.published   { color: #7DAE8C; }
+
+  .btn { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; padding: 7px 16px; border-radius: 6px; border: none; cursor: pointer; transition: all 0.15s; letter-spacing: 0.02em; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--slate); }
+  .btn-ghost:hover { color: var(--white); border-color: var(--muted); }
+  .btn-primary { background: #5F9EAF; color: white; }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-publish { background: #7DAE8C; color: white; }
+  .btn-publish:hover { filter: brightness(1.1); }
+  .btn-publish:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
+
+  .app { display: flex; height: calc(100vh - 52px); }
+
+  .sidebar { width: 340px; min-width: 340px; background: var(--navy-mid); border-right: 1px solid var(--slate); display: flex; flex-direction: column; overflow: hidden; }
+  .sidebar-tabs { display: flex; border-bottom: 1px solid var(--slate); flex-shrink: 0; }
+  .tab { flex: 1; padding: 11px 0; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: transparent; border: none; cursor: pointer; transition: all 0.15s; font-family: 'DM Mono', monospace; }
+  .tab.active { color: var(--white); border-bottom: 2px solid #5F9EAF; margin-bottom: -1px; }
+  .tab:hover:not(.active) { color: var(--white); }
+  .sidebar-body { flex: 1; overflow-y: auto; padding: 16px; }
+  .sidebar-body::-webkit-scrollbar { width: 4px; }
+  .sidebar-body::-webkit-scrollbar-thumb { background: var(--slate); border-radius: 2px; }
+
+  .add-form { background: var(--slate); border-radius: 8px; padding: 14px; margin-bottom: 16px; }
+  .add-form h3 { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 12px; }
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; font-family: 'DM Mono', monospace; }
+  .field input, .field select { width: 100%; background: var(--navy-mid); border: 1px solid var(--slate); border-radius: 5px; padding: 7px 10px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--white); outline: none; transition: border-color 0.15s; }
+  .field input:focus, .field select:focus { border-color: #5F9EAF; }
+  .field select option { background: var(--navy-mid); }
+  .field-row { display: flex; gap: 8px; }
+  .field-row .field { flex: 1; }
+
+  .project-item {
+    background: var(--slate); border-radius: 7px; padding: 10px 28px 10px 24px;
+    margin-bottom: 6px; cursor: pointer; border: 1px solid transparent;
+    transition: border-color 0.15s; position: relative;
+  }
+  .project-item:hover { border-color: var(--muted); }
+  .project-item.selected { border-color: #5F9EAF; background: rgba(88,128,196,0.1); }
+  .project-item.dragging { opacity: 0.3; }
+  .project-item.drag-over-top { border-top: 2px solid #5F9EAF; }
+  .project-item.drag-over-bottom { border-bottom: 2px solid #5F9EAF; }
+  .drag-handle { position: absolute; left: 7px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; cursor: grab; opacity: 0; transition: opacity 0.15s; user-select: none; }
+  .project-item:hover .drag-handle { opacity: 1; }
+  .project-item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .team-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .project-name { font-size: 12px; font-weight: 500; color: var(--white); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .type-pill { font-size: 9px; font-weight: 600; padding: 2px 7px; border-radius: 10px; font-family: 'DM Mono', monospace; color: white; flex-shrink: 0; }
+  .project-meta { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .delete-btn { position: absolute; top: 6px; right: 7px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; line-height: 1; opacity: 0; transition: opacity 0.15s; padding: 2px 4px; }
+  .project-item:hover .delete-btn { opacity: 1; }
+  .delete-btn:hover { color: #C97B6E; }
+
+  .group-label { font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-family: 'DM Mono', monospace; padding: 10px 4px 5px; border-top: 1px solid var(--slate); margin-top: 4px; border-radius: 4px; transition: all 0.15s; }
+  .group-label:first-child { border-top: none; padding-top: 0; }
+  .group-label.drag-target { color: var(--white); background: rgba(95,158,175,0.12); padding-left: 8px; }
+
+  .legend-section { margin-bottom: 20px; }
+  .legend-title { font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+  .legend-swatch { width: 28px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+  .legend-name { font-size: 12px; color: var(--white); }
+
+  .edit-panel { background: var(--slate); border-top: 1px solid rgba(255,255,255,0.06); padding: 14px 16px; flex-shrink: 0; }
+  .edit-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .edit-panel-title { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-family: 'DM Mono', monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+  .btn-delete { background: rgba(201,123,110,0.15); color: #E07070; border: 1px solid rgba(201,123,110,0.3); font-size: 11px; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; flex-shrink: 0; }
+  .btn-delete:hover { background: rgba(201,123,110,0.28); }
+
+  .multi-team-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .toggle-switch { width: 32px; height: 17px; background: var(--navy-mid); border-radius: 9px; position: relative; cursor: pointer; transition: background 0.2s; border: 1px solid var(--muted); outline: none; }
+  .toggle-switch.on { background: #5F9EAF; border-color: #5F9EAF; }
+  .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; background: white; border-radius: 50%; transition: left 0.2s; }
+  .toggle-switch.on::after { left: 17px; }
+  .toggle-label { font-size: 11px; color: var(--muted); }
+  .segment-row { display: flex; gap: 5px; align-items: center; margin-bottom: 6px; }
+  .segment-row select, .segment-row input { background: var(--navy-mid); border: 1px solid var(--slate); border-radius: 4px; padding: 5px 6px; font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--white); outline: none; }
+  .segment-row select { flex: 1; }
+  .segment-row input { width: 46px; }
+  .seg-label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; min-width: 18px; }
+  .btn-seg-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 2px 3px; line-height: 1; }
+  .btn-seg-del:hover { color: #C97B6E; }
+
+  .main { flex: 1; overflow: auto; background: var(--light); }
+  .main::-webkit-scrollbar { width: 6px; height: 6px; }
+  .main::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 3px; }
+  .gantt-wrap { min-width: 860px; }
+  .gantt-header { background: var(--navy); position: sticky; top: 0; z-index: 10; }
+  .gantt-year-row { display: flex; margin-left: 260px; }
+  .gantt-year { flex: 4; text-align: center; font-size: 10px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--white); padding: 5px 0; letter-spacing: 0.06em; }
+  .gantt-year:nth-child(1) { background: #1E2D3F; }
+  .gantt-year:nth-child(2) { background: #2D3E50; }
+  .gantt-year:nth-child(3) { background: #3D5060; }
+  .gantt-q-row { display: flex; }
+  .gantt-label-col { width: 260px; min-width: 260px; background: var(--navy-mid); border-right: 1px solid var(--slate); }
+  .gantt-label-header { height: 26px; display: flex; align-items: center; padding: 0 10px; font-size: 9px; font-weight: 500; letter-spacing: 0.08em; font-family: 'DM Mono', monospace; color: var(--muted); text-transform: uppercase; gap: 8px; }
+  .gantt-q { flex: 1; text-align: center; font-size: 9px; font-family: 'DM Mono', monospace; color: var(--mid); padding: 5px 0; border-left: 1px solid var(--slate); }
+  .gantt-q:nth-child(even) { background: rgba(255,255,255,0.02); }
+  .gantt-group-header { display: flex; align-items: center; height: 26px; background: var(--navy-mid); border-top: 1px solid var(--slate); border-bottom: 1px solid var(--slate); }
+  .gantt-group-label { width: 260px; min-width: 260px; padding: 0 10px; font-size: 9px; font-weight: 600; letter-spacing: 0.1em; font-family: 'DM Mono', monospace; color: var(--muted); text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+  .gantt-group-bar { width: 3px; height: 12px; border-radius: 2px; }
+  .gantt-group-cells { flex: 1; display: flex; }
+  .gantt-group-cell { flex: 1; border-left: 1px solid rgba(255,255,255,0.04); }
+  .gantt-row { display: flex; align-items: center; height: 34px; border-bottom: 1px solid var(--rule); cursor: pointer; }
+  .gantt-row:nth-child(even) { background: var(--white); }
+  .gantt-row:nth-child(odd)  { background: var(--offwhite); }
+  .gantt-row:hover { background: rgba(88,128,196,0.06) !important; }
+  .gantt-row.selected-row { background: rgba(88,128,196,0.1) !important; }
+  .gantt-row-label { width: 260px; min-width: 260px; height: 100%; display: flex; align-items: center; padding: 0 8px; gap: 6px; border-right: 1px solid var(--rule); }
+  .row-type-bar { width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0; }
+  .row-team-bar { width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0; }
+  .row-name { font-size: 11px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+  .gantt-cells { flex: 1; display: flex; height: 100%; position: relative; }
+  .gantt-cell { flex: 1; height: 100%; border-left: 1px solid var(--rule); }
+  .gantt-cell.year-boundary { border-left-color: #B0BCC8; border-left-width: 1.5px; }
+  .gantt-bar { position: absolute; top: 50%; transform: translateY(-50%); height: 18px; border-radius: 3px; opacity: 0.9; pointer-events: none; }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--slate); color: var(--white); padding: 10px 18px; border-radius: 8px; font-size: 13px; border-left: 3px solid #5F9EAF; transform: translateY(60px); opacity: 0; transition: all 0.3s; z-index: 999; pointer-events: none; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 140px; color: var(--muted); font-size: 12px; gap: 6px; }
+
+  /* ── Publish modal ── */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .modal { background: var(--navy-mid); border: 1px solid var(--slate); border-radius: 10px; width: 100%; max-width: 480px; padding: 24px; }
+  .modal h2 { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 6px; }
+  .modal p { font-size: 12px; color: var(--muted); margin-bottom: 18px; line-height: 1.6; }
+  .modal .field input { font-family: 'DM Mono', monospace; font-size: 11px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+  .modal-note { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; background: var(--navy); border-radius: 5px; padding: 8px 10px; margin-top: 12px; line-height: 1.7; }
+  .modal-note a { color: #5F9EAF; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">LONG VIEW <span>/ PORTFOLIO EDITOR</span></div>
+  <div class="header-actions">
+    <span class="save-indicator" id="save-indicator">LOADING</span>
+    <span class="publish-indicator unpublished" id="publish-indicator" style="display:none">UNPUBLISHED CHANGES</span>
+    <button class="btn btn-ghost" onclick="resetData()">Reset to Default</button>
+    <button class="btn btn-ghost" onclick="exportPPTX()">⬇ Export PPTX</button>
+    <button class="btn btn-publish" id="btn-publish" onclick="openPublishModal()">↑ Publish</button>
+  </div>
+</header>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-tabs">
+      <button class="tab active" onclick="switchTab('projects',this)">Projects</button>
+      <button class="tab" onclick="switchTab('legend',this)">Legend</button>
+    </div>
+
+    <div class="sidebar-body" id="tab-projects">
+      <div class="add-form">
+        <h3>Add Project</h3>
+        <div class="field"><label>Name</label><input type="text" id="new-name" placeholder="Project name"></div>
+        <div class="field-row">
+          <div class="field"><label>Type</label><select id="new-type"></select></div>
+          <div class="field"><label>Team</label><select id="new-team"></select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Start Q (1–12)</label><input type="number" id="new-start" min="1" max="12" value="1"></div>
+          <div class="field"><label>End Q (1–12)</label><input type="number" id="new-end" min="1" max="12" value="4"></div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="addProject()">+ Add Project</button>
+      </div>
+      <div id="project-list"></div>
+    </div>
+
+    <div class="sidebar-body" id="tab-legend" style="display:none">
+      <div class="legend-section">
+        <div class="legend-title">Team Color</div>
+        <div id="team-legend"></div>
+      </div>
+      <div class="legend-section">
+        <div class="legend-title">Work Type</div>
+        <div id="type-legend"></div>
+      </div>
+    </div>
+
+    <div class="edit-panel" id="edit-panel" style="display:none">
+      <div class="edit-panel-header">
+        <span class="edit-panel-title" id="edit-title">Edit</span>
+        <button class="btn-delete" onclick="deleteProject(selectedId)">🗑 Delete</button>
+      </div>
+      <div class="field"><label>Name</label><input type="text" id="edit-name" oninput="updateSelected('name',this.value)"></div>
+      <div class="field-row">
+        <div class="field"><label>Type</label><select id="edit-type" onchange="updateSelected('type',this.value)"></select></div>
+        <div class="field"><label>Team</label><select id="edit-team" onchange="updateSelected('team',this.value)"></select></div>
+      </div>
+      <div class="multi-team-toggle">
+        <button class="toggle-switch" id="multi-toggle" onclick="toggleMultiTeam()"></button>
+        <span class="toggle-label">Multi-team segments</span>
+      </div>
+      <div id="single-range">
+        <div class="field-row">
+          <div class="field"><label>Start Q (1–12)</label><input type="number" id="edit-start" min="1" max="12" oninput="updateSelected('start',+this.value)"></div>
+          <div class="field"><label>End Q (1–12)</label><input type="number" id="edit-end" min="1" max="12" oninput="updateSelected('end',+this.value)"></div>
+        </div>
+      </div>
+      <div id="segment-editor" style="display:none">
+        <div id="segments-list"></div>
+        <button class="btn btn-ghost" style="width:100%;font-size:11px;margin-top:4px" onclick="addSegment()">+ Add Segment</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="gantt-wrap" id="gantt"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TEAMS = {
+  multiple:    { color: '#8C9EAD', name: 'Multiple Teams' },
+  prodStratDev:{ color: '#7DAE8C', name: 'Prod Strategy (Dev)' },
+  devops:      { color: '#5F9EAF', name: 'Dev Ops' },
+  martech:     { color: '#C97B6E', name: 'Martech' },
+  newsroom:    { color: '#D49060', name: 'Newsroom Tools' },
+  readerExp:   { color: '#A87FA8', name: 'Reader Experience' },
+  prodStratDis:{ color: '#3AADA8', name: 'Prod Strategy (Discovery)' },
+  dataEng:     { color: '#D47A90', name: 'Data Engineering' },
+  reporting:   { color: '#C4A840', name: 'Reporting / Insights' },
+  appTeam:     { color: '#8A8EC4', name: 'App Team' },
+  platform:    { color: '#5880C4', name: 'Platform Team' },
+  unassigned:  { color: '#BFC6CE', name: 'Unassigned' },
+};
+const TYPES = {
+  acquisition: { label: 'Acquisition',  color: '#8C9EAD' },
+  always:      { label: 'Always On',    color: '#3AADA8' },
+  replatform:  { label: 'Replatform',   color: '#C97B6E' },
+  core:        { label: 'Core Feature', color: '#5880C4' },
+  market:      { label: 'Market Focus', color: '#A87FA8' },
+  newprod:     { label: 'New Product',  color: '#7DAE8C' },
+  multi:       { label: 'Ongoing Ops',  color: '#8C9EAD' },
+};
+const TYPE_ORDER = ['acquisition','always','replatform','core','market','newprod','multi'];
+const QUARTERS   = ["Q1 '26","Q2 '26","Q3 '26","Q4 '26","Q1 '27","Q2 '27","Q3 '27","Q4 '27","Q1 '28","Q2 '28","Q3 '28","Q4 '28"];
+const STORAGE_KEY       = 'longview_projects_v1';
+const GITHUB_CONFIG_KEY = 'longview_github_config';
+
+const DEFAULT_PROJECTS = [
+  { id:1,  name:'Dallas',                              team:'multiple',    type:'acquisition', start:1,  end:2  },
+  { id:2,  name:'Reporting & Insights',                team:'reporting',   type:'always',      start:1,  end:12 },
+  { id:3,  name:'MediaOS',                             team:'newsroom',    type:'replatform',  start:1,  end:6  },
+  { id:4,  name:'Auth0',                               team:'martech',     type:'replatform',  start:1,  end:4  },
+  { id:5,  name:'Chargebee',                           team:'martech',     type:'replatform',  start:2,  end:5  },
+  { id:6,  name:'Infrastructure Revamp',               team:'devops',      type:'replatform',  start:3,  end:8  },
+  { id:7,  name:'2nd Surface / Video',                 team:'multiple',    type:'core',        start:1,  end:4  },
+  { id:8,  name:'UGC / Utility / Reasons to Register', team:'multiple',    type:'core',
+    segments:[{team:'prodStratDis',start:2,end:2},{team:'platform',start:3,end:5}] },
+  { id:9,  name:'Userjoy Foundations',                 team:'platform',    type:'core',        start:1,  end:3  },
+  { id:10, name:'Events (Kafka)',                      team:'dataEng',     type:'core',        start:2,  end:4  },
+  { id:11, name:'Metadata Enrichment',                 team:'dataEng',     type:'core',        start:3,  end:5  },
+  { id:12, name:'Feature Store',                       team:'dataEng',     type:'core',        start:4,  end:5  },
+  { id:13, name:'Personalization - Content',           team:'dataEng',     type:'core',        start:4,  end:6  },
+  { id:14, name:'Personalization - Mktg Journeys',     team:'dataEng',     type:'core',        start:4,  end:6  },
+  { id:15, name:'Aggregation - Content',               team:'unassigned',  type:'core',        start:5,  end:7  },
+  { id:16, name:'Multivariate Testing Platform',       team:'multiple',    type:'core',
+    segments:[{team:'prodStratDis',start:5,end:6},{team:'dataEng',start:6,end:7}] },
+  { id:17, name:'Aggregation - Data',                  team:'unassigned',  type:'core',        start:6,  end:8  },
+  { id:18, name:'App Strategy',                        team:'prodStratDis',type:'core',        start:5,  end:6  },
+  { id:19, name:'App Rebuild',                         team:'appTeam',     type:'core',        start:6,  end:9  },
+  { id:20, name:'Automated Test Coverage',             team:'unassigned',  type:'core',        start:1,  end:4  },
+  { id:21, name:'Ad Products',                         team:'multiple',    type:'core',
+    segments:[{team:'prodStratDis',start:4,end:5},{team:'dataEng',start:5,end:6}] },
+  { id:22, name:'Products for Agentic',                team:'multiple',    type:'core',
+    segments:[{team:'prodStratDis',start:7,end:8},{team:'platform',start:8,end:12}] },
+  { id:23, name:'Liquid Design System',                team:'prodStratDis',type:'core',        start:5,  end:7  },
+  { id:24, name:'CT',                                  team:'readerExp',   type:'market',      start:1,  end:4  },
+  { id:25, name:'Property Tax Guide',                  team:'prodStratDev',type:'newprod',     start:1,  end:2  },
+  { id:26, name:'Cap Con CA',                          team:'multiple',    type:'newprod',
+    segments:[{team:'prodStratDev',start:1,end:1},{team:'prodStratDis',start:2,end:3}] },
+  { id:27, name:'SFG Membership',                      team:'multiple',    type:'newprod',
+    segments:[{team:'prodStratDev',start:1,end:1},{team:'prodStratDis',start:2,end:3},{team:'devops',start:3,end:5}] },
+  { id:28, name:'Texas Business Product',              team:'multiple',    type:'newprod',
+    segments:[{team:'prodStratDis',start:4,end:5},{team:'devops',start:5,end:6},{team:'readerExp',start:6,end:7}] },
+  { id:29, name:'Life Events',                         team:'multiple',    type:'newprod',
+    segments:[{team:'prodStratDis',start:5,end:6},{team:'readerExp',start:6,end:9}] },
+  { id:30, name:'Restaurants / Food Maps',             team:'unassigned',  type:'newprod',     start:7,  end:10 },
+  { id:31, name:'Best of Revamp',                      team:'unassigned',  type:'newprod',     start:6,  end:8  },
+  { id:32, name:'Listings Category Analysis',          team:'unassigned',  type:'newprod',     start:8,  end:11 },
+  { id:33, name:'Product Strategy (Dev)',              team:'prodStratDev',type:'multi',       start:1,  end:12 },
+  { id:34, name:'Dev Ops',                             team:'devops',      type:'multi',       start:1,  end:12 },
+  { id:35, name:'Martech',                             team:'martech',     type:'multi',       start:1,  end:12 },
+  { id:36, name:'Newsroom Tools',                      team:'newsroom',    type:'multi',       start:1,  end:12 },
+  { id:37, name:'Reader Experience',                   team:'readerExp',   type:'multi',       start:1,  end:12 },
+  { id:38, name:'Product Strategy (Discovery)',        team:'prodStratDis',type:'multi',       start:3,  end:8  },
+  { id:39, name:'Data Engineering',                    team:'dataEng',     type:'multi',       start:1,  end:12 },
+  { id:40, name:'App Team (not staffed)',               team:'appTeam',     type:'multi',       start:7,  end:12 },
+  { id:41, name:'Platform Team',                       team:'platform',    type:'multi',       start:1,  end:12 },
+];
+
+// ── STATE ──────────────────────────────────
+function loadProjects() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
+}
+
+function saveProjects() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    const ind = document.getElementById('save-indicator');
+    ind.textContent = 'SAVED'; ind.classList.add('saved');
+    setTimeout(() => { ind.textContent = 'AUTO-SAVED'; }, 1500);
+  } catch(e) { console.warn('localStorage unavailable'); }
+}
+
+function loadGithubConfig() {
+  try {
+    const raw = localStorage.getItem(GITHUB_CONFIG_KEY);
+    return raw ? JSON.parse(raw) : { owner: '', repo: '', path: 'data/projects.json', branch: 'main' };
+  } catch(e) { return { owner: '', repo: '', path: 'data/projects.json', branch: 'main' }; }
+}
+
+function saveGithubConfig(cfg) {
+  const safe = { owner: cfg.owner, repo: cfg.repo, path: cfg.path, branch: cfg.branch };
+  localStorage.setItem(GITHUB_CONFIG_KEY, JSON.stringify(safe));
+}
+
+let projects      = loadProjects();
+let nextId        = Math.max(0, ...projects.map(p => p.id)) + 1;
+let selectedId    = null;
+let saveTimer     = null;
+
+function markDirty() {
+  const pi = document.getElementById('publish-indicator');
+  pi.style.display = '';
+  pi.className = 'publish-indicator unpublished';
+  pi.textContent = 'UNPUBLISHED CHANGES';
+}
+
+function markPublished() {
+  const pi = document.getElementById('publish-indicator');
+  pi.style.display = '';
+  pi.className = 'publish-indicator published';
+  pi.textContent = 'PUBLISHED';
+  setTimeout(() => { pi.style.display = 'none'; }, 3000);
+}
+
+function scheduleSave() {
+  const ind = document.getElementById('save-indicator');
+  ind.textContent = 'UNSAVED'; ind.classList.remove('saved');
+  markDirty();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveProjects, 700);
+}
+
+function resetData() {
+  if (!confirm('Reset all projects to the original defaults? This cannot be undone.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  projects = JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
+  nextId = 42; selectedId = null;
+  closeEditPanel(); renderAll(); saveProjects();
+  markDirty();
+  toast('Reset to defaults — click Publish to share');
+}
+
+// ── PUBLISH TO GITHUB ──────────────────────
+function openPublishModal() {
+  document.getElementById('publish-modal')?.remove();
+  const cfg = loadGithubConfig();
+  const m = document.createElement('div');
+  m.id = 'publish-modal';
+  m.className = 'modal-bg';
+  m.innerHTML = `
+    <div class="modal">
+      <h2>Publish to GitHub</h2>
+      <p>Writes <code style="color:#5F9EAF">data/projects.json</code> to your repo so the viewer can read it. Your PAT is used only for this request and is never stored.</p>
+      <div class="field"><label>GitHub Owner / Org</label><input type="text" id="gh-owner" value="${cfg.owner}" placeholder="e.g. acme-corp"></div>
+      <div class="field"><label>Repository</label><input type="text" id="gh-repo" value="${cfg.repo}" placeholder="e.g. longview"></div>
+      <div class="field-row">
+        <div class="field"><label>File Path</label><input type="text" id="gh-path" value="${cfg.path}"></div>
+        <div class="field"><label>Branch</label><input type="text" id="gh-branch" value="${cfg.branch}"></div>
+      </div>
+      <div class="field"><label>Personal Access Token (fine-grained, Contents: read &amp; write)</label>
+        <input type="password" id="gh-token" placeholder="github_pat_…" autocomplete="off"></div>
+      <div class="modal-note">
+        Need a token? → <a href="https://github.com/settings/tokens?type=beta" target="_blank">github.com/settings/tokens</a><br>
+        Permissions needed: <strong style="color:#fff">Repository contents → Read and write</strong>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="document.getElementById('publish-modal').remove()">Cancel</button>
+        <button class="btn btn-publish" id="btn-do-publish" onclick="doPublish()">↑ Publish Now</button>
+      </div>
+    </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+  document.getElementById('gh-token').focus();
+}
+
+async function doPublish() {
+  const owner  = document.getElementById('gh-owner').value.trim();
+  const repo   = document.getElementById('gh-repo').value.trim();
+  const path   = document.getElementById('gh-path').value.trim();
+  const branch = document.getElementById('gh-branch').value.trim();
+  const token  = document.getElementById('gh-token').value.trim();
+
+  if (!owner || !repo || !token) { toast('Owner, repo and token are required'); return; }
+
+  saveGithubConfig({ owner, repo, path, branch });
+
+  const btn = document.getElementById('btn-do-publish');
+  btn.disabled = true; btn.textContent = 'Publishing…';
+
+  try {
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(projects, null, 2))));
+
+    let sha = null;
+    const check = await fetch(`${apiUrl}?ref=${branch}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }
+    });
+    if (check.ok) {
+      const existing = await check.json();
+      sha = existing.sha;
+    } else if (check.status !== 404) {
+      throw new Error(`GitHub API error ${check.status}: ${await check.text()}`);
+    }
+
+    const body = {
+      message: `chore: publish roadmap data ${new Date().toISOString().slice(0,16).replace('T',' ')}`,
+      content,
+      branch,
+      ...(sha ? { sha } : {})
+    };
+
+    const res = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+
+    document.getElementById('publish-modal').remove();
+    markPublished();
+    toast('Published! Viewer will reflect changes shortly.');
+  } catch(e) {
+    btn.disabled = false; btn.textContent = '↑ Publish Now';
+    toast('Publish failed: ' + e.message);
+    console.error(e);
+  }
+}
+
+// ── SELECTS ────────────────────────────────
+function populateSelects() {
+  const teamOpts = Object.entries(TEAMS).map(([k,t]) => `<option value="${k}">${t.name}</option>`).join('');
+  const typeOpts = TYPE_ORDER.map(k => `<option value="${k}">${TYPES[k].label}</option>`).join('');
+  ['new-team','edit-team'].forEach(id => document.getElementById(id).innerHTML = teamOpts);
+  ['new-type','edit-type'].forEach(id => document.getElementById(id).innerHTML = typeOpts);
+  document.getElementById('new-type').value = 'core';
+}
+
+// ── RENDER ─────────────────────────────────
+function teamColor(p) {
+  return (p.segments ? TEAMS[p.segments[0].team] : TEAMS[p.team])?.color || '#ccc';
+}
+
+function renderAll() { renderGantt(); renderList(); renderLegend(); }
+
+function renderList() {
+  const grouped = {};
+  TYPE_ORDER.forEach(t => grouped[t] = []);
+  projects.forEach(p => { if (grouped[p.type]) grouped[p.type].push(p); });
+
+  let html = '';
+  TYPE_ORDER.forEach(type => {
+    const grp = grouped[type];
+    if (!grp.length) return;
+    html += `<div class="group-label" data-drop-group="${type}">${TYPES[type].label}</div>`;
+    grp.forEach(p => {
+      const range = p.segments ? p.segments.map(s=>`Q${s.start}–Q${s.end}`).join(', ') : `Q${p.start} – Q${p.end}`;
+      html += `
+        <div class="project-item${selectedId===p.id?' selected':''}" data-id="${p.id}" draggable="true" onclick="selectProject(${p.id})">
+          <span class="drag-handle">⠿</span>
+          <div class="project-item-header">
+            <div class="team-dot" style="background:${teamColor(p)}"></div>
+            <span class="project-name">${p.name}</span>
+            <span class="type-pill" style="background:${TYPES[p.type].color}">${TYPES[p.type].label.split(' ')[0]}</span>
+          </div>
+          <div class="project-meta">${range}</div>
+          <button class="delete-btn" onclick="event.stopPropagation();deleteProject(${p.id})">×</button>
+        </div>`;
+    });
+  });
+  document.getElementById('project-list').innerHTML = html || '<div class="empty"><span>📋</span><span>No projects yet</span></div>';
+  wireDrag();
+}
+
+function renderLegend() {
+  document.getElementById('team-legend').innerHTML = Object.entries(TEAMS).map(([,t]) =>
+    `<div class="legend-item"><div class="legend-swatch" style="background:${t.color}"></div><span class="legend-name">${t.name}</span></div>`).join('');
+  document.getElementById('type-legend').innerHTML = Object.entries(TYPES).map(([,t]) =>
+    `<div class="legend-item"><div class="legend-swatch" style="background:${t.color};border-radius:10px"></div><span class="legend-name">${t.label}</span></div>`).join('');
+}
+
+function renderGantt() {
+  const grouped = {};
+  TYPE_ORDER.forEach(t => grouped[t] = []);
+  projects.forEach(p => { if (grouped[p.type]) grouped[p.type].push(p); });
+
+  let html = `
+    <div class="gantt-header">
+      <div class="gantt-year-row">
+        <div class="gantt-year">2026</div><div class="gantt-year">2027</div><div class="gantt-year">2028</div>
+      </div>
+      <div class="gantt-q-row">
+        <div class="gantt-label-col"><div class="gantt-label-header"><span>TYPE</span><span>TEAM</span><span>PROJECT</span></div></div>
+        ${QUARTERS.map(q=>`<div class="gantt-q">${q}</div>`).join('')}
+      </div>
+    </div><div class="gantt-body">`;
+
+  TYPE_ORDER.forEach(type => {
+    const grp = grouped[type];
+    if (!grp.length) return;
+    const tc = TYPES[type];
+    html += `<div class="gantt-group-header">
+      <div class="gantt-group-label"><div class="gantt-group-bar" style="background:${tc.color}"></div>${tc.label}</div>
+      <div class="gantt-group-cells">${QUARTERS.map(()=>'<div class="gantt-group-cell"></div>').join('')}</div>
+    </div>`;
+    grp.forEach(p => {
+      const segs = p.segments || [{team:p.team,start:p.start,end:p.end}];
+      const bars = segs.map(s => {
+        const l = ((s.start-1)/12*100).toFixed(3);
+        const w = ((s.end-s.start+1)/12*100).toFixed(3);
+        return `<div class="gantt-bar" style="left:${l}%;width:calc(${w}% - 3px);background:${TEAMS[s.team]?.color||'#ccc'}"></div>`;
+      }).join('');
+      html += `<div class="gantt-row${selectedId===p.id?' selected-row':''}" onclick="selectProject(${p.id})">
+        <div class="gantt-row-label">
+          <div class="row-type-bar" style="background:${TYPES[p.type].color}"></div>
+          <div class="row-team-bar" style="background:${teamColor(p)}"></div>
+          <span class="row-name">${p.name}</span>
+        </div>
+        <div class="gantt-cells">
+          ${QUARTERS.map((_,i)=>`<div class="gantt-cell${i%4===0?' year-boundary':''}"></div>`).join('')}
+          ${bars}
+        </div>
+      </div>`;
+    });
+  });
+  html += '</div>';
+  document.getElementById('gantt').innerHTML = html;
+}
+
+// ── SELECT / EDIT ──────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-projects').style.display = name==='projects' ? '' : 'none';
+  document.getElementById('tab-legend').style.display   = name==='legend'   ? '' : 'none';
+}
+
+function selectProject(id) {
+  selectedId = selectedId === id ? null : id;
+  renderAll();
+  selectedId ? openEditPanel() : closeEditPanel();
+}
+
+function openEditPanel() {
+  const p = projects.find(x => x.id === selectedId);
+  if (!p) return;
+  document.getElementById('edit-panel').style.display = '';
+  document.getElementById('edit-title').textContent   = p.name.length > 24 ? p.name.slice(0,24)+'…' : p.name;
+  document.getElementById('edit-name').value  = p.name;
+  document.getElementById('edit-type').value  = p.type;
+  document.getElementById('edit-team').value  = p.team;
+  const multi = !!p.segments;
+  document.getElementById('multi-toggle').classList.toggle('on', multi);
+  document.getElementById('single-range').style.display   = multi ? 'none' : '';
+  document.getElementById('segment-editor').style.display = multi ? '' : 'none';
+  if (!multi) { document.getElementById('edit-start').value = p.start; document.getElementById('edit-end').value = p.end; }
+  else renderSegmentEditor(p);
+}
+
+function closeEditPanel() { document.getElementById('edit-panel').style.display = 'none'; }
+
+function renderSegmentEditor(p) {
+  const opts = Object.entries(TEAMS).map(([k,t])=>`<option value="${k}">${t.name}</option>`).join('');
+  document.getElementById('segments-list').innerHTML = (p.segments||[]).map((s,i)=>`
+    <div class="segment-row">
+      <span class="seg-label">#${i+1}</span>
+      <select onchange="updateSegment(${i},'team',this.value)">${opts.replace(`value="${s.team}"`,`value="${s.team}" selected`)}</select>
+      <input type="number" min="1" max="12" value="${s.start}" onchange="updateSegment(${i},'start',+this.value)">
+      <input type="number" min="1" max="12" value="${s.end}"   onchange="updateSegment(${i},'end',+this.value)">
+      <button class="btn-seg-del" onclick="removeSegment(${i})">×</button>
+    </div>`).join('');
+}
+
+function updateSelected(field, value) {
+  const p = projects.find(x => x.id === selectedId);
+  if (!p) return;
+  if      (field==='name')  { p.name=value; document.getElementById('edit-title').textContent = value.length>24?value.slice(0,24)+'…':value; }
+  else if (field==='type')  p.type=value;
+  else if (field==='team')  p.team=value;
+  else if (field==='start') p.start=Math.max(1,Math.min(12,value));
+  else if (field==='end')   p.end=Math.max(1,Math.min(12,value));
+  scheduleSave(); renderAll();
+}
+
+function updateSegment(i, field, value) {
+  const p = projects.find(x => x.id === selectedId);
+  if (!p?.segments) return;
+  p.segments[i][field] = value;
+  scheduleSave(); renderAll();
+}
+
+function removeSegment(i) {
+  const p = projects.find(x => x.id === selectedId);
+  if (!p?.segments) return;
+  p.segments.splice(i,1);
+  if (!p.segments.length) { delete p.segments; p.start=1; p.end=4; }
+  scheduleSave(); renderAll(); openEditPanel();
+}
+
+function addSegment() {
+  const p = projects.find(x => x.id === selectedId);
+  if (!p) return;
+  if (!p.segments) p.segments=[];
+  const last = p.segments[p.segments.length-1];
+  p.segments.push({team:'multiple', start:last?Math.min(last.end+1,12):1, end:last?Math.min(last.end+2,12):2});
+  scheduleSave(); renderAll(); renderSegmentEditor(p);
+}
+
+function toggleMultiTeam() {
+  const p = projects.find(x => x.id === selectedId);
+  if (!p) return;
+  if (p.segments) { delete p.segments; p.start=1; p.end=4; }
+  else { p.segments=[{team:p.team,start:p.start||1,end:p.end||4}]; delete p.start; delete p.end; }
+  scheduleSave(); renderAll(); openEditPanel();
+}
+
+function addProject() {
+  const name  = document.getElementById('new-name').value.trim();
+  const start = Math.max(1,Math.min(12,+document.getElementById('new-start').value));
+  const end   = Math.max(1,Math.min(12,+document.getElementById('new-end').value));
+  if (!name) { toast('Enter a project name'); return; }
+  if (start>end) { toast('Start must be ≤ End'); return; }
+  projects.push({ id:nextId++, name, type:document.getElementById('new-type').value, team:document.getElementById('new-team').value, start, end });
+  document.getElementById('new-name').value='';
+  scheduleSave(); renderAll(); toast('Project added');
+}
+
+function deleteProject(id) {
+  if (!id) return;
+  projects = projects.filter(p => p.id !== id);
+  if (selectedId===id) { selectedId=null; closeEditPanel(); }
+  scheduleSave(); renderAll(); toast('Project deleted');
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2200);
+}
+
+// ── DRAG TO REORDER ────────────────────────
+let dragId = null;
+
+function wireDrag() {
+  document.querySelectorAll('.project-item[data-id]').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      dragId = +el.dataset.id;
+      setTimeout(() => el.classList.add('dragging'), 0);
+      e.dataTransfer.effectAllowed='move';
+    });
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      document.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(x=>x.classList.remove('drag-over-top','drag-over-bottom'));
+      dragId=null;
+    });
+    el.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (+el.dataset.id===dragId) return;
+      document.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(x=>x.classList.remove('drag-over-top','drag-over-bottom'));
+      const mid = el.getBoundingClientRect().top + el.offsetHeight/2;
+      el.classList.add(e.clientY<mid ? 'drag-over-top' : 'drag-over-bottom');
+    });
+    el.addEventListener('dragleave', ()=>el.classList.remove('drag-over-top','drag-over-bottom'));
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      if (!dragId || +el.dataset.id===dragId) return;
+      const before = e.clientY < el.getBoundingClientRect().top + el.offsetHeight/2;
+      const fromIdx = projects.findIndex(p=>p.id===dragId);
+      const [moved] = projects.splice(fromIdx,1);
+      moved.type = projects.find(p=>p.id===+el.dataset.id)?.type || moved.type;
+      const toIdx = projects.findIndex(p=>p.id===+el.dataset.id);
+      projects.splice(before?toIdx:toIdx+1, 0, moved);
+      scheduleSave(); renderAll();
+    });
+  });
+
+  document.querySelectorAll('.group-label[data-drop-group]').forEach(el => {
+    el.addEventListener('dragover',  e => { e.preventDefault(); el.classList.add('drag-target'); });
+    el.addEventListener('dragleave', ()  => el.classList.remove('drag-target'));
+    el.addEventListener('drop', e => {
+      e.preventDefault(); el.classList.remove('drag-target');
+      if (!dragId) return;
+      const p = projects.find(x=>x.id===dragId);
+      if (!p) return;
+      const t = el.dataset.dropGroup;
+      if (p.type!==t) { p.type=t; scheduleSave(); renderAll(); toast(`Moved to ${TYPES[t].label}`); }
+    });
+  });
+}
+
+// ── EXPORT PPTX ───────────────────────────
+async function exportPPTX() {
+  toast('Generating script…');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:1000,
+        messages:[{ role:'user', content:`Generate complete runnable Node.js code using pptxgenjs to create a roadmap PPTX.
+
+TEAMS: ${JSON.stringify(TEAMS)}
+TYPES: ${JSON.stringify(TYPES)}
+PROJECTS (start/end are 1-indexed quarters 1=Q1'26 through 12=Q4'28): ${JSON.stringify(projects)}
+
+Requirements:
+- Slide dimensions: 10" x 5.625" (16x9)
+- Slide 1: Title "Long View Portfolio" dark navy #16202E bg, team color swatches legend left half, type pill legend right half
+- Slide 2: Full overview Gantt of all projects except type=multi, dense rows, all 12 quarters
+- One slide per work type group (skip multi): group replatform+acquisition+always+market on one slide, core split if >10 items, newprod together
+- One "Ongoing Operations" slide for type=multi
+- Each gantt slide: dark navy header bar, TYPE pill column (x=0.06 w=0.88 rounded rect filled with type color white bold text 7pt), team swatch thin bar x=1.02, project name x=1.12, 12 quarter columns with year sub-headers
+- Bar fill = team color (no # prefix in pptxgenjs hex values), transparency 18, border same color 1.2pt
+- For segments array: render multiple adjacent bars each colored by segment.team
+- ROW_H auto-calculated to fit all rows on each slide
+- Output file: ./LongView_Export.pptx
+
+Output ONLY the complete Node.js code, no markdown fences, no explanation.` }]
+      })
+    });
+    const data = await res.json();
+    const code = (data.content?.find(b=>b.type==='text')?.text||'').replace(/```(?:javascript|js|node)?\n?/g,'').replace(/```/g,'').trim();
+    showCodeModal(code);
+  } catch(e) { toast('Export failed: '+e.message); }
+}
+
+function showCodeModal(code) {
+  document.getElementById('code-modal')?.remove();
+  const m = document.createElement('div');
+  m.id='code-modal';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px';
+  m.innerHTML=`<div style="background:#1E2D3F;border:1px solid #2D3E50;border-radius:10px;width:100%;max-width:720px;max-height:82vh;display:flex;flex-direction:column;overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #2D3E50;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-family:'DM Mono',monospace;font-size:11px;color:#8A9BAE;letter-spacing:.06em">GENERATED PPTX SCRIPT</span>
+      <div style="display:flex;gap:8px">
+        <button onclick="navigator.clipboard.writeText(document.getElementById('gen-code').value);this.textContent='✓ Copied!';setTimeout(()=>this.textContent='Copy',1500)"
+          style="background:#2D3E50;border:none;color:white;padding:6px 14px;border-radius:5px;cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif">Copy</button>
+        <button onclick="document.getElementById('code-modal').remove()"
+          style="background:transparent;border:1px solid #546070;color:#8A9BAE;padding:6px 14px;border-radius:5px;cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif">Close</button>
+      </div>
+    </div>
+    <div style="padding:9px 16px;background:#16202E;font-size:10px;color:#8A9BAE;font-family:'DM Mono',monospace;border-bottom:1px solid #2D3E50">
+      Save as <strong style="color:#fff">roadmap.js</strong> &nbsp;→&nbsp; run <strong style="color:#5F9EAF">node roadmap.js</strong> &nbsp;→&nbsp; opens as LongView_Export.pptx
+    </div>
+    <textarea id="gen-code" readonly style="flex:1;background:#16202E;color:#BFC6CE;font-family:'DM Mono',monospace;font-size:10.5px;padding:16px;border:none;outline:none;resize:none;line-height:1.6;min-height:280px"></textarea>
+  </div>`;
+  m.querySelector('textarea').value = code;
+  document.body.appendChild(m);
+  m.addEventListener('click', e => { if (e.target===m) m.remove(); });
+}
+
+// ── INIT ──────────────────────────────────
+populateSelects();
+renderAll();
+saveProjects();
+</script>
+</body>
+</html>

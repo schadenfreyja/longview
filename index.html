@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Long View Portfolio Editor</title>
+<title>Long View Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -29,95 +29,25 @@
   }
   .logo { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--white); letter-spacing: 0.04em; }
   .logo span { color: var(--muted); }
-  .header-actions { display: flex; gap: 10px; align-items: center; }
-  .save-indicator { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.05em; transition: color 0.3s; }
-  .save-indicator.saved { color: #7DAE8C; }
-
-  .btn { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; padding: 7px 16px; border-radius: 6px; border: none; cursor: pointer; transition: all 0.15s; letter-spacing: 0.02em; }
-  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--slate); }
-  .btn-ghost:hover { color: var(--white); border-color: var(--muted); }
-  .btn-primary { background: #5F9EAF; color: white; }
-  .btn-primary:hover { filter: brightness(1.1); }
+  .header-meta { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.05em; display: flex; align-items: center; gap: 16px; }
+  .header-meta .dot { width: 6px; height: 6px; border-radius: 50%; background: #7DAE8C; display: inline-block; margin-right: 5px; }
+  .header-meta .dot.loading { background: #D49060; animation: pulse 1.2s ease-in-out infinite; }
+  .header-meta .dot.error   { background: #C97B6E; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
 
   .app { display: flex; height: calc(100vh - 52px); }
 
-  .sidebar { width: 340px; min-width: 340px; background: var(--navy-mid); border-right: 1px solid var(--slate); display: flex; flex-direction: column; overflow: hidden; }
-  .sidebar-tabs { display: flex; border-bottom: 1px solid var(--slate); flex-shrink: 0; }
-  .tab { flex: 1; padding: 11px 0; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: transparent; border: none; cursor: pointer; transition: all 0.15s; font-family: 'DM Mono', monospace; }
-  .tab.active { color: var(--white); border-bottom: 2px solid #5F9EAF; margin-bottom: -1px; }
-  .tab:hover:not(.active) { color: var(--white); }
-  .sidebar-body { flex: 1; overflow-y: auto; padding: 16px; }
-  .sidebar-body::-webkit-scrollbar { width: 4px; }
-  .sidebar-body::-webkit-scrollbar-thumb { background: var(--slate); border-radius: 2px; }
-
-  .add-form { background: var(--slate); border-radius: 8px; padding: 14px; margin-bottom: 16px; }
-  .add-form h3 { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 12px; }
-  .field { margin-bottom: 10px; }
-  .field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; font-family: 'DM Mono', monospace; }
-  .field input, .field select { width: 100%; background: var(--navy-mid); border: 1px solid var(--slate); border-radius: 5px; padding: 7px 10px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--white); outline: none; transition: border-color 0.15s; }
-  .field input:focus, .field select:focus { border-color: #5F9EAF; }
-  .field select option { background: var(--navy-mid); }
-  .field-row { display: flex; gap: 8px; }
-  .field-row .field { flex: 1; }
-
-  .project-item {
-    background: var(--slate); border-radius: 7px; padding: 10px 28px 10px 24px;
-    margin-bottom: 6px; cursor: pointer; border: 1px solid transparent;
-    transition: border-color 0.15s; position: relative;
-  }
-  .project-item:hover { border-color: var(--muted); }
-  .project-item.selected { border-color: #5F9EAF; background: rgba(88,128,196,0.1); }
-  .project-item.dragging { opacity: 0.3; }
-  .project-item.drag-over-top { border-top: 2px solid #5F9EAF; }
-  .project-item.drag-over-bottom { border-bottom: 2px solid #5F9EAF; }
-  .drag-handle { position: absolute; left: 7px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; cursor: grab; opacity: 0; transition: opacity 0.15s; user-select: none; }
-  .project-item:hover .drag-handle { opacity: 1; }
-  .project-item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-  .team-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-  .project-name { font-size: 12px; font-weight: 500; color: var(--white); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .type-pill { font-size: 9px; font-weight: 600; padding: 2px 7px; border-radius: 10px; font-family: 'DM Mono', monospace; color: white; flex-shrink: 0; }
-  .project-meta { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
-  .delete-btn { position: absolute; top: 6px; right: 7px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; line-height: 1; opacity: 0; transition: opacity 0.15s; padding: 2px 4px; }
-  .project-item:hover .delete-btn { opacity: 1; }
-  .delete-btn:hover { color: #C97B6E; }
-
-  .group-label { font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-family: 'DM Mono', monospace; padding: 10px 4px 5px; border-top: 1px solid var(--slate); margin-top: 4px; border-radius: 4px; transition: all 0.15s; }
-  .group-label:first-child { border-top: none; padding-top: 0; }
-  .group-label.drag-target { color: var(--white); background: rgba(95,158,175,0.12); padding-left: 8px; }
-
-  .legend-section { margin-bottom: 20px; }
+  /* ── Legend sidebar (read-only, no editor) ── */
+  .sidebar { width: 220px; min-width: 220px; background: var(--navy-mid); border-right: 1px solid var(--slate); overflow-y: auto; padding: 20px 16px; }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--slate); border-radius: 2px; }
+  .legend-section { margin-bottom: 24px; }
   .legend-title { font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 10px; }
-  .legend-item { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
-  .legend-swatch { width: 28px; height: 14px; border-radius: 3px; flex-shrink: 0; }
-  .legend-name { font-size: 12px; color: var(--white); }
-  .team-row { display:flex; align-items:center; gap:7px; margin-bottom:7px; }
-  .team-color-btn { width:22px; height:22px; border-radius:4px; border:none; cursor:pointer; flex-shrink:0; padding:0; }
-  .team-name-input { flex:1; background:transparent; border:none; color:var(--white); font-size:12px; font-family:'DM Sans',sans-serif; outline:none; min-width:0; }
-  .team-name-input:focus { border-bottom:1px solid #5F9EAF; }
-  .team-del-btn { background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:2px 3px; line-height:1; opacity:0.5; }
-  .team-del-btn:hover { color:#C97B6E; opacity:1; }
-  input[type="color"] { -webkit-appearance:none; appearance:none; }
+  .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .legend-swatch { width: 22px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .legend-name { font-size: 11px; color: var(--white); line-height: 1.3; }
 
-  .edit-panel { background: var(--slate); border-top: 1px solid rgba(255,255,255,0.06); padding: 14px 16px; flex-shrink: 0; }
-  .edit-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .edit-panel-title { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-family: 'DM Mono', monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
-  .btn-delete { background: rgba(201,123,110,0.15); color: #E07070; border: 1px solid rgba(201,123,110,0.3); font-size: 11px; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; flex-shrink: 0; }
-  .btn-delete:hover { background: rgba(201,123,110,0.28); }
-
-  .multi-team-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-  .toggle-switch { width: 32px; height: 17px; background: var(--navy-mid); border-radius: 9px; position: relative; cursor: pointer; transition: background 0.2s; border: 1px solid var(--muted); outline: none; }
-  .toggle-switch.on { background: #5F9EAF; border-color: #5F9EAF; }
-  .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; background: white; border-radius: 50%; transition: left 0.2s; }
-  .toggle-switch.on::after { left: 17px; }
-  .toggle-label { font-size: 11px; color: var(--muted); }
-  .segment-row { display: flex; gap: 5px; align-items: center; margin-bottom: 6px; }
-  .segment-row select, .segment-row input { background: var(--navy-mid); border: 1px solid var(--slate); border-radius: 4px; padding: 5px 6px; font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--white); outline: none; }
-  .segment-row select { flex: 1; }
-  .segment-row input { width: 46px; }
-  .seg-label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; min-width: 18px; }
-  .btn-seg-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 2px 3px; line-height: 1; }
-  .btn-seg-del:hover { color: #C97B6E; }
-
+  /* ── Gantt ── */
   .main { flex: 1; overflow: auto; background: var(--light); }
   .main::-webkit-scrollbar { width: 6px; height: 6px; }
   .main::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 3px; }
@@ -138,11 +68,10 @@
   .gantt-group-bar { width: 3px; height: 12px; border-radius: 2px; }
   .gantt-group-cells { flex: 1; display: flex; }
   .gantt-group-cell { flex: 1; border-left: 1px solid rgba(255,255,255,0.04); }
-  .gantt-row { display: flex; align-items: center; height: 34px; border-bottom: 1px solid var(--rule); cursor: pointer; }
+  .gantt-row { display: flex; align-items: center; height: 34px; border-bottom: 1px solid var(--rule); }
   .gantt-row:nth-child(even) { background: var(--white); }
   .gantt-row:nth-child(odd)  { background: var(--offwhite); }
   .gantt-row:hover { background: rgba(88,128,196,0.06) !important; }
-  .gantt-row.selected-row { background: rgba(88,128,196,0.1) !important; }
   .gantt-row-label { width: 260px; min-width: 260px; height: 100%; display: flex; align-items: center; padding: 0 8px; gap: 6px; border-right: 1px solid var(--rule); }
   .row-type-bar { width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0; }
   .row-team-bar { width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0; }
@@ -152,105 +81,58 @@
   .gantt-cell.year-boundary { border-left-color: #B0BCC8; border-left-width: 1.5px; }
   .gantt-bar { position: absolute; top: 50%; transform: translateY(-50%); height: 18px; border-radius: 3px; opacity: 0.9; pointer-events: none; }
 
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--slate); color: var(--white); padding: 10px 18px; border-radius: 8px; font-size: 13px; border-left: 3px solid #5F9EAF; transform: translateY(60px); opacity: 0; transition: all 0.3s; z-index: 999; pointer-events: none; }
-  .toast.show { transform: translateY(0); opacity: 1; }
-  .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 140px; color: var(--muted); font-size: 12px; gap: 6px; }
+  /* ── Loading / error states ── */
+  .state-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; color: var(--muted); }
+  .state-screen .big { font-size: 32px; }
+  .state-screen .title { font-size: 14px; font-weight: 500; color: var(--white); }
+  .state-screen .sub { font-size: 12px; font-family: 'DM Mono', monospace; max-width: 360px; text-align: center; line-height: 1.7; }
+  .state-screen .sub code { color: #5F9EAF; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">LONG VIEW <span>/ PORTFOLIO EDITOR</span></div>
-  <div class="header-actions">
-    <span class="save-indicator" id="save-indicator">LOADING</span>
-    <button class="btn btn-ghost" onclick="resetData()">Reset to Default</button>
-    <button class="btn btn-ghost" onclick="exportPPTX()">⬇ Export PPTX</button>
+  <div class="logo">LONG VIEW <span>/ PORTFOLIO ROADMAP</span></div>
+  <div class="header-meta">
+    <span><span class="dot loading" id="status-dot"></span><span id="status-text">Loading…</span></span>
+    <span id="updated-at" style="display:none"></span>
   </div>
 </header>
 
 <div class="app">
   <div class="sidebar">
-    <div class="sidebar-tabs">
-      <button class="tab active" onclick="switchTab('projects',this)">Projects</button>
-      <button class="tab" onclick="switchTab('legend',this)">Legend</button>
+    <div class="legend-section">
+      <div class="legend-title">Team</div>
+      <div id="team-legend"></div>
     </div>
-
-    <div class="sidebar-body" id="tab-projects">
-      <div class="add-form">
-        <h3>Add Project</h3>
-        <div class="field"><label>Name</label><input type="text" id="new-name" placeholder="Project name"></div>
-        <div class="field-row">
-          <div class="field"><label>Type</label><select id="new-type"></select></div>
-          <div class="field"><label>Team</label><select id="new-team"></select></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Start Q (1–12)</label><input type="number" id="new-start" min="1" max="12" value="1"></div>
-          <div class="field"><label>End Q (1–12)</label><input type="number" id="new-end" min="1" max="12" value="4"></div>
-        </div>
-        <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="addProject()">+ Add Project</button>
-      </div>
-      <div id="project-list"></div>
-    </div>
-
-    <div class="sidebar-body" id="tab-legend" style="display:none">
-      <div class="add-form" style="margin-bottom:14px">
-        <h3>Add Team</h3>
-        <div class="field"><label>Name</label><input type="text" id="new-team-name" placeholder="Team name"></div>
-        <div class="field">
-          <label>Color</label>
-          <div style="display:flex;gap:8px;align-items:center">
-            <input type="color" id="new-team-color" value="#7DAE8C" oninput="document.getElementById('new-team-color-hex').value=this.value" style="width:44px;height:32px;padding:2px;border-radius:5px;border:1px solid var(--slate);background:var(--navy-mid);cursor:pointer">
-            <input type="text" id="new-team-color-hex" value="#7DAE8C" placeholder="#rrggbb" style="flex:1" oninput="syncColorFromHex('new')">
-          </div>
-        </div>
-        <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="addTeam()">+ Add Team</button>
-      </div>
-      <div class="legend-section">
-        <div class="legend-title">Teams</div>
-        <div id="team-legend"></div>
-      </div>
-      <div class="legend-section">
-        <div class="legend-title">Work Type</div>
-        <div id="type-legend"></div>
-      </div>
-    </div>
-
-    <div class="edit-panel" id="edit-panel" style="display:none">
-      <div class="edit-panel-header">
-        <span class="edit-panel-title" id="edit-title">Edit</span>
-        <button class="btn-delete" onclick="deleteProject(selectedId)">🗑 Delete</button>
-      </div>
-      <div class="field"><label>Name</label><input type="text" id="edit-name" oninput="updateSelected('name',this.value)"></div>
-      <div class="field-row">
-        <div class="field"><label>Type</label><select id="edit-type" onchange="updateSelected('type',this.value)"></select></div>
-        <div class="field"><label>Team</label><select id="edit-team" onchange="updateSelected('team',this.value)"></select></div>
-      </div>
-      <div class="multi-team-toggle">
-        <button class="toggle-switch" id="multi-toggle" onclick="toggleMultiTeam()"></button>
-        <span class="toggle-label">Multi-team segments</span>
-      </div>
-      <div id="single-range">
-        <div class="field-row">
-          <div class="field"><label>Start Q (1–12)</label><input type="number" id="edit-start" min="1" max="12" oninput="updateSelected('start',+this.value)"></div>
-          <div class="field"><label>End Q (1–12)</label><input type="number" id="edit-end" min="1" max="12" oninput="updateSelected('end',+this.value)"></div>
-        </div>
-      </div>
-      <div id="segment-editor" style="display:none">
-        <div id="segments-list"></div>
-        <button class="btn btn-ghost" style="width:100%;font-size:11px;margin-top:4px" onclick="addSegment()">+ Add Segment</button>
-      </div>
+    <div class="legend-section">
+      <div class="legend-title">Work Type</div>
+      <div id="type-legend"></div>
     </div>
   </div>
 
-  <div class="main">
-    <div class="gantt-wrap" id="gantt"></div>
+  <div class="main" id="main-area">
+    <div class="state-screen" id="loading-screen">
+      <span class="big">⏳</span>
+      <span class="title">Loading roadmap…</span>
+      <span class="sub">Fetching latest data from GitHub.</span>
+    </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
-const DEFAULT_TEAMS = {
+// ─────────────────────────────────────────────────────────────
+//  CONFIG — set these to match your repo
+//  These are read-only values; no secret is needed for a public
+//  repo. For a private repo you'll need a read-only PAT passed
+//  via a Vercel environment variable and a thin API route.
+// ─────────────────────────────────────────────────────────────
+const GITHUB_OWNER  = '%%GITHUB_OWNER%%';   // e.g. 'acme-corp'
+const GITHUB_REPO   = '%%GITHUB_REPO%%';    // e.g. 'longview'
+const GITHUB_BRANCH = '%%GITHUB_BRANCH%%';  // e.g. 'main'
+const GITHUB_PATH   = 'data/projects.json'; // path inside the repo
+
+const TEAMS = {
   multiple:    { color: '#8C9EAD', name: 'Multiple Teams' },
   prodStratDev:{ color: '#7DAE8C', name: 'Prod Strategy (Dev)' },
   devops:      { color: '#5F9EAF', name: 'Dev Ops' },
@@ -264,14 +146,6 @@ const DEFAULT_TEAMS = {
   platform:    { color: '#5880C4', name: 'Platform Team' },
   unassigned:  { color: '#BFC6CE', name: 'Unassigned' },
 };
-const TEAMS_KEY = 'longview_teams_v1';
-let TEAMS = (() => {
-  try { const s = localStorage.getItem(TEAMS_KEY); if (s) return JSON.parse(s); } catch(e) {}
-  return JSON.parse(JSON.stringify(DEFAULT_TEAMS));
-})();
-function saveTeams() {
-  try { localStorage.setItem(TEAMS_KEY, JSON.stringify(TEAMS)); } catch(e) {}
-}
 const TYPES = {
   acquisition: { label: 'Acquisition',  color: '#8C9EAD' },
   always:      { label: 'Always On',    color: '#3AADA8' },
@@ -283,209 +157,45 @@ const TYPES = {
 };
 const TYPE_ORDER = ['acquisition','always','replatform','core','market','newprod','multi'];
 const QUARTERS   = ["Q1 '26","Q2 '26","Q3 '26","Q4 '26","Q1 '27","Q2 '27","Q3 '27","Q4 '27","Q1 '28","Q2 '28","Q3 '28","Q4 '28"];
-const STORAGE_KEY = 'longview_projects_v1';
 
-const DEFAULT_PROJECTS = [
-  { id:1,  name:'Dallas',                              team:'multiple',    type:'acquisition', start:1,  end:2  },
-  { id:2,  name:'Reporting & Insights',                team:'reporting',   type:'always',      start:1,  end:12 },
-  { id:3,  name:'MediaOS',                             team:'newsroom',    type:'replatform',  start:1,  end:6  },
-  { id:4,  name:'Auth0',                               team:'martech',     type:'replatform',  start:1,  end:4  },
-  { id:5,  name:'Chargebee',                           team:'martech',     type:'replatform',  start:2,  end:5  },
-  { id:6,  name:'Infrastructure Revamp',               team:'devops',      type:'replatform',  start:3,  end:8  },
-  { id:7,  name:'2nd Surface / Video',                 team:'multiple',    type:'core',        start:1,  end:4  },
-  { id:8,  name:'UGC / Utility / Reasons to Register', team:'multiple',    type:'core',
-    segments:[{team:'prodStratDis',start:2,end:2},{team:'platform',start:3,end:5}] },
-  { id:9,  name:'Userjoy Foundations',                 team:'platform',    type:'core',        start:1,  end:3  },
-  { id:10, name:'Events (Kafka)',                      team:'dataEng',     type:'core',        start:2,  end:4  },
-  { id:11, name:'Metadata Enrichment',                 team:'dataEng',     type:'core',        start:3,  end:5  },
-  { id:12, name:'Feature Store',                       team:'dataEng',     type:'core',        start:4,  end:5  },
-  { id:13, name:'Personalization - Content',           team:'dataEng',     type:'core',        start:4,  end:6  },
-  { id:14, name:'Personalization - Mktg Journeys',     team:'dataEng',     type:'core',        start:4,  end:6  },
-  { id:15, name:'Aggregation - Content',               team:'unassigned',  type:'core',        start:5,  end:7  },
-  { id:16, name:'Multivariate Testing Platform',       team:'multiple',    type:'core',
-    segments:[{team:'prodStratDis',start:5,end:6},{team:'dataEng',start:6,end:7}] },
-  { id:17, name:'Aggregation - Data',                  team:'unassigned',  type:'core',        start:6,  end:8  },
-  { id:18, name:'App Strategy',                        team:'prodStratDis',type:'core',        start:5,  end:6  },
-  { id:19, name:'App Rebuild',                         team:'appTeam',     type:'core',        start:6,  end:9  },
-  { id:20, name:'Automated Test Coverage',             team:'unassigned',  type:'core',        start:1,  end:4  },
-  { id:21, name:'Ad Products',                         team:'multiple',    type:'core',
-    segments:[{team:'prodStratDis',start:4,end:5},{team:'dataEng',start:5,end:6}] },
-  { id:22, name:'Products for Agentic',                team:'multiple',    type:'core',
-    segments:[{team:'prodStratDis',start:7,end:8},{team:'platform',start:8,end:12}] },
-  { id:23, name:'Liquid Design System',                team:'prodStratDis',type:'core',        start:5,  end:7  },
-  { id:24, name:'CT',                                  team:'readerExp',   type:'market',      start:1,  end:4  },
-  { id:25, name:'Property Tax Guide',                  team:'prodStratDev',type:'newprod',     start:1,  end:2  },
-  { id:26, name:'Cap Con CA',                          team:'multiple',    type:'newprod',
-    segments:[{team:'prodStratDev',start:1,end:1},{team:'prodStratDis',start:2,end:3}] },
-  { id:27, name:'SFG Membership',                      team:'multiple',    type:'newprod',
-    segments:[{team:'prodStratDev',start:1,end:1},{team:'prodStratDis',start:2,end:3},{team:'devops',start:3,end:5}] },
-  { id:28, name:'Texas Business Product',              team:'multiple',    type:'newprod',
-    segments:[{team:'prodStratDis',start:4,end:5},{team:'devops',start:5,end:6},{team:'readerExp',start:6,end:7}] },
-  { id:29, name:'Life Events',                         team:'multiple',    type:'newprod',
-    segments:[{team:'prodStratDis',start:5,end:6},{team:'readerExp',start:6,end:9}] },
-  { id:30, name:'Restaurants / Food Maps',             team:'unassigned',  type:'newprod',     start:7,  end:10 },
-  { id:31, name:'Best of Revamp',                      team:'unassigned',  type:'newprod',     start:6,  end:8  },
-  { id:32, name:'Listings Category Analysis',          team:'unassigned',  type:'newprod',     start:8,  end:11 },
-  { id:33, name:'Product Strategy (Dev)',              team:'prodStratDev',type:'multi',       start:1,  end:12 },
-  { id:34, name:'Dev Ops',                             team:'devops',      type:'multi',       start:1,  end:12 },
-  { id:35, name:'Martech',                             team:'martech',     type:'multi',       start:1,  end:12 },
-  { id:36, name:'Newsroom Tools',                      team:'newsroom',    type:'multi',       start:1,  end:12 },
-  { id:37, name:'Reader Experience',                   team:'readerExp',   type:'multi',       start:1,  end:12 },
-  { id:38, name:'Product Strategy (Discovery)',        team:'prodStratDis',type:'multi',       start:3,  end:8  },
-  { id:39, name:'Data Engineering',                    team:'dataEng',     type:'multi',       start:1,  end:12 },
-  { id:40, name:'App Team (not staffed)',               team:'appTeam',     type:'multi',       start:7,  end:12 },
-  { id:41, name:'Platform Team',                       team:'platform',    type:'multi',       start:1,  end:12 },
-];
-
-// ── STATE ──────────────────────────────────
-function loadProjects() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
-  return JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
-}
-
-function saveProjects() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-    const ind = document.getElementById('save-indicator');
-    ind.textContent = 'SAVED'; ind.classList.add('saved');
-    setTimeout(() => { ind.textContent = 'AUTO-SAVED'; }, 1500);
-  } catch(e) { console.warn('localStorage unavailable'); }
-}
-
-let projects   = loadProjects();
-let nextId     = Math.max(0, ...projects.map(p => p.id)) + 1;
-let selectedId = null;
-let saveTimer  = null;
-
-function scheduleSave() {
-  const ind = document.getElementById('save-indicator');
-  ind.textContent = 'UNSAVED'; ind.classList.remove('saved');
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveProjects, 700);
-}
-
-function resetData() {
-  if (!confirm('Reset all projects to the original defaults? This cannot be undone.')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem(TEAMS_KEY);
-  projects = JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
-  TEAMS = JSON.parse(JSON.stringify(DEFAULT_TEAMS));
-  nextId = 42; selectedId = null;
-  closeEditPanel(); populateSelects(); renderAll(); saveProjects(); saveTeams();
-  toast('Reset to defaults');
-}
-
-// ── SELECTS ────────────────────────────────
-function populateSelects() {
-  const teamOpts = Object.entries(TEAMS).map(([k,t]) => `<option value="${k}">${t.name}</option>`).join('');
-  const typeOpts = TYPE_ORDER.map(k => `<option value="${k}">${TYPES[k].label}</option>`).join('');
-  ['new-team','edit-team'].forEach(id => document.getElementById(id).innerHTML = teamOpts);
-  ['new-type','edit-type'].forEach(id => document.getElementById(id).innerHTML = typeOpts);
-  document.getElementById('new-type').value = 'core';
-}
-
-// ── RENDER ─────────────────────────────────
 function teamColor(p) {
   return (p.segments ? TEAMS[p.segments[0].team] : TEAMS[p.team])?.color || '#ccc';
 }
 
-function renderAll() { renderGantt(); renderList(); renderLegend(); }
+// ── FETCH DATA ─────────────────────────────
+async function loadData() {
+  // Use the raw content URL — works for public repos with no auth.
+  // For a private repo: swap this for a /api/data Vercel serverless
+  // function that injects a read-only PAT from process.env.
+  const url = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_PATH}`;
 
-function renderList() {
-  const grouped = {};
-  TYPE_ORDER.forEach(t => grouped[t] = []);
-  projects.forEach(p => { if (grouped[p.type]) grouped[p.type].push(p); });
-
-  let html = '';
-  TYPE_ORDER.forEach(type => {
-    const grp = grouped[type];
-    if (!grp.length) return;
-    html += `<div class="group-label" data-drop-group="${type}">${TYPES[type].label}</div>`;
-    grp.forEach(p => {
-      const range = p.segments ? p.segments.map(s=>`Q${s.start}–Q${s.end}`).join(', ') : `Q${p.start} – Q${p.end}`;
-      html += `
-        <div class="project-item${selectedId===p.id?' selected':''}" data-id="${p.id}" draggable="true" onclick="selectProject(${p.id})">
-          <span class="drag-handle">⠿</span>
-          <div class="project-item-header">
-            <div class="team-dot" style="background:${teamColor(p)}"></div>
-            <span class="project-name">${p.name}</span>
-            <span class="type-pill" style="background:${TYPES[p.type].color}">${TYPES[p.type].label.split(' ')[0]}</span>
-          </div>
-          <div class="project-meta">${range}</div>
-          <button class="delete-btn" onclick="event.stopPropagation();deleteProject(${p.id})">×</button>
-        </div>`;
-    });
-  });
-  document.getElementById('project-list').innerHTML = html || '<div class="empty"><span>📋</span><span>No projects yet</span></div>';
-  wireDrag();
+  try {
+    const res = await fetch(url + '?t=' + Date.now()); // bust CDN cache
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const projects = await res.json();
+    const lastMod  = res.headers.get('last-modified');
+    return { projects, lastMod };
+  } catch(e) {
+    throw e;
+  }
 }
 
+function setStatus(state, text) {
+  const dot  = document.getElementById('status-dot');
+  const span = document.getElementById('status-text');
+  dot.className  = 'dot ' + state;
+  span.textContent = text;
+}
+
+// ── RENDER ─────────────────────────────────
 function renderLegend() {
-  document.getElementById('team-legend').innerHTML = Object.entries(TEAMS).map(([k,t]) => `
-    <div class="team-row">
-      <input type="color" class="team-color-btn" value="${t.color}"
-        oninput="updateTeamColor('${k}',this.value)"
-        title="Click to change color">
-      <input class="team-name-input" value="${t.name}"
-        oninput="updateTeamName('${k}',this.value)"
-        title="Click to rename">
-      <button class="team-del-btn" onclick="deleteTeam('${k}')" title="Delete team">×</button>
-    </div>`).join('');
+  document.getElementById('team-legend').innerHTML = Object.entries(TEAMS).map(([,t]) =>
+    `<div class="legend-item"><div class="legend-swatch" style="background:${t.color}"></div><span class="legend-name">${t.name}</span></div>`).join('');
   document.getElementById('type-legend').innerHTML = Object.entries(TYPES).map(([,t]) =>
     `<div class="legend-item"><div class="legend-swatch" style="background:${t.color};border-radius:10px"></div><span class="legend-name">${t.label}</span></div>`).join('');
 }
 
-function addTeam() {
-  const name  = document.getElementById('new-team-name').value.trim();
-  const color = document.getElementById('new-team-color').value;
-  if (!name) { toast('Enter a team name'); return; }
-  const key = name.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').slice(0,24) + '_' + Date.now().toString(36);
-  TEAMS[key] = { name, color };
-  saveTeams();
-  populateSelects();
-  renderAll();
-  document.getElementById('new-team-name').value = '';
-  toast('Team added');
-}
-
-function updateTeamName(key, value) {
-  if (!TEAMS[key]) return;
-  TEAMS[key].name = value;
-  saveTeams();
-  scheduleSave(); // re-render list + gantt labels
-  renderGantt(); renderList();
-}
-
-function updateTeamColor(key, value) {
-  if (!TEAMS[key]) return;
-  TEAMS[key].color = value;
-  saveTeams();
-  renderGantt(); renderList();
-}
-
-function deleteTeam(key) {
-  const inUse = projects.some(p =>
-    (p.team === key) || (p.segments && p.segments.some(s => s.team === key)));
-  if (inUse) { toast('Team is in use — reassign projects first'); return; }
-  if (!confirm(`Delete team "${TEAMS[key].name}"?`)) return;
-  delete TEAMS[key];
-  saveTeams();
-  populateSelects();
-  renderAll();
-  toast('Team deleted');
-}
-
-function syncColorFromHex(prefix) {
-  const hex = document.getElementById(prefix+'-team-color-hex').value;
-  if (/^#[0-9a-fA-F]{6}$/.test(hex)) {
-    document.getElementById(prefix+'-team-color').value = hex;
-  }
-}
-
-function renderGantt() {
+function renderGantt(projects) {
   const grouped = {};
   TYPE_ORDER.forEach(t => grouped[t] = []);
   projects.forEach(p => { if (grouped[p.type]) grouped[p.type].push(p); });
@@ -516,7 +226,7 @@ function renderGantt() {
         const w = ((s.end-s.start+1)/12*100).toFixed(3);
         return `<div class="gantt-bar" style="left:${l}%;width:calc(${w}% - 3px);background:${TEAMS[s.team]?.color||'#ccc'}"></div>`;
       }).join('');
-      html += `<div class="gantt-row${selectedId===p.id?' selected-row':''}" onclick="selectProject(${p.id})">
+      html += `<div class="gantt-row">
         <div class="gantt-row-label">
           <div class="row-type-bar" style="background:${TYPES[p.type].color}"></div>
           <div class="row-team-bar" style="background:${teamColor(p)}"></div>
@@ -530,356 +240,47 @@ function renderGantt() {
     });
   });
   html += '</div>';
-  document.getElementById('gantt').innerHTML = html;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'gantt-wrap';
+  wrap.innerHTML = html;
+  const main = document.getElementById('main-area');
+  main.innerHTML = '';
+  main.appendChild(wrap);
 }
 
-// ── SELECT / EDIT ──────────────────────────
-function switchTab(name, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('tab-projects').style.display = name==='projects' ? '' : 'none';
-  document.getElementById('tab-legend').style.display   = name==='legend'   ? '' : 'none';
-}
-
-function selectProject(id) {
-  selectedId = selectedId === id ? null : id;
-  renderAll();
-  selectedId ? openEditPanel() : closeEditPanel();
-}
-
-function openEditPanel() {
-  const p = projects.find(x => x.id === selectedId);
-  if (!p) return;
-  document.getElementById('edit-panel').style.display = '';
-  document.getElementById('edit-title').textContent   = p.name.length > 24 ? p.name.slice(0,24)+'…' : p.name;
-  document.getElementById('edit-name').value  = p.name;
-  document.getElementById('edit-type').value  = p.type;
-  document.getElementById('edit-team').value  = p.team;
-  const multi = !!p.segments;
-  document.getElementById('multi-toggle').classList.toggle('on', multi);
-  document.getElementById('single-range').style.display   = multi ? 'none' : '';
-  document.getElementById('segment-editor').style.display = multi ? '' : 'none';
-  if (!multi) { document.getElementById('edit-start').value = p.start; document.getElementById('edit-end').value = p.end; }
-  else renderSegmentEditor(p);
-}
-
-function closeEditPanel() { document.getElementById('edit-panel').style.display = 'none'; }
-
-function renderSegmentEditor(p) {
-  const opts = Object.entries(TEAMS).map(([k,t])=>`<option value="${k}">${t.name}</option>`).join('');
-  document.getElementById('segments-list').innerHTML = (p.segments||[]).map((s,i)=>`
-    <div class="segment-row">
-      <span class="seg-label">#${i+1}</span>
-      <select onchange="updateSegment(${i},'team',this.value)">${opts.replace(`value="${s.team}"`,`value="${s.team}" selected`)}</select>
-      <input type="number" min="1" max="12" value="${s.start}" onchange="updateSegment(${i},'start',+this.value)">
-      <input type="number" min="1" max="12" value="${s.end}"   onchange="updateSegment(${i},'end',+this.value)">
-      <button class="btn-seg-del" onclick="removeSegment(${i})">×</button>
-    </div>`).join('');
-}
-
-function updateSelected(field, value) {
-  const p = projects.find(x => x.id === selectedId);
-  if (!p) return;
-  if      (field==='name')  { p.name=value; document.getElementById('edit-title').textContent = value.length>24?value.slice(0,24)+'…':value; }
-  else if (field==='type')  p.type=value;
-  else if (field==='team')  p.team=value;
-  else if (field==='start') p.start=Math.max(1,Math.min(12,value));
-  else if (field==='end')   p.end=Math.max(1,Math.min(12,value));
-  scheduleSave(); renderAll();
-}
-
-function updateSegment(i, field, value) {
-  const p = projects.find(x => x.id === selectedId);
-  if (!p?.segments) return;
-  p.segments[i][field] = value;
-  scheduleSave(); renderAll();
-}
-
-function removeSegment(i) {
-  const p = projects.find(x => x.id === selectedId);
-  if (!p?.segments) return;
-  p.segments.splice(i,1);
-  if (!p.segments.length) { delete p.segments; p.start=1; p.end=4; }
-  scheduleSave(); renderAll(); openEditPanel();
-}
-
-function addSegment() {
-  const p = projects.find(x => x.id === selectedId);
-  if (!p) return;
-  if (!p.segments) p.segments=[];
-  const last = p.segments[p.segments.length-1];
-  p.segments.push({team:'multiple', start:last?Math.min(last.end+1,12):1, end:last?Math.min(last.end+2,12):2});
-  scheduleSave(); renderAll(); renderSegmentEditor(p);
-}
-
-function toggleMultiTeam() {
-  const p = projects.find(x => x.id === selectedId);
-  if (!p) return;
-  if (p.segments) { delete p.segments; p.start=1; p.end=4; }
-  else { p.segments=[{team:p.team,start:p.start||1,end:p.end||4}]; delete p.start; delete p.end; }
-  scheduleSave(); renderAll(); openEditPanel();
-}
-
-function addProject() {
-  const name  = document.getElementById('new-name').value.trim();
-  const start = Math.max(1,Math.min(12,+document.getElementById('new-start').value));
-  const end   = Math.max(1,Math.min(12,+document.getElementById('new-end').value));
-  if (!name) { toast('Enter a project name'); return; }
-  if (start>end) { toast('Start must be ≤ End'); return; }
-  projects.push({ id:nextId++, name, type:document.getElementById('new-type').value, team:document.getElementById('new-team').value, start, end });
-  document.getElementById('new-name').value='';
-  scheduleSave(); renderAll(); toast('Project added');
-}
-
-function deleteProject(id) {
-  if (!id) return;
-  projects = projects.filter(p => p.id !== id);
-  if (selectedId===id) { selectedId=null; closeEditPanel(); }
-  scheduleSave(); renderAll(); toast('Project deleted');
-}
-
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent=msg; el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'), 2200);
-}
-
-// ── DRAG TO REORDER ────────────────────────
-let dragId = null;
-
-function wireDrag() {
-  document.querySelectorAll('.project-item[data-id]').forEach(el => {
-    el.addEventListener('dragstart', e => {
-      dragId = +el.dataset.id;
-      setTimeout(() => el.classList.add('dragging'), 0);
-      e.dataTransfer.effectAllowed='move';
-    });
-    el.addEventListener('dragend', () => {
-      el.classList.remove('dragging');
-      document.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(x=>x.classList.remove('drag-over-top','drag-over-bottom'));
-      dragId=null;
-    });
-    el.addEventListener('dragover', e => {
-      e.preventDefault();
-      if (+el.dataset.id===dragId) return;
-      document.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(x=>x.classList.remove('drag-over-top','drag-over-bottom'));
-      const mid = el.getBoundingClientRect().top + el.offsetHeight/2;
-      el.classList.add(e.clientY<mid ? 'drag-over-top' : 'drag-over-bottom');
-    });
-    el.addEventListener('dragleave', ()=>el.classList.remove('drag-over-top','drag-over-bottom'));
-    el.addEventListener('drop', e => {
-      e.preventDefault();
-      if (!dragId || +el.dataset.id===dragId) return;
-      const before = e.clientY < el.getBoundingClientRect().top + el.offsetHeight/2;
-      const fromIdx = projects.findIndex(p=>p.id===dragId);
-      const [moved] = projects.splice(fromIdx,1);
-      moved.type = projects.find(p=>p.id===+el.dataset.id)?.type || moved.type;
-      const toIdx = projects.findIndex(p=>p.id===+el.dataset.id);
-      projects.splice(before?toIdx:toIdx+1, 0, moved);
-      scheduleSave(); renderAll();
-    });
-  });
-
-  document.querySelectorAll('.group-label[data-drop-group]').forEach(el => {
-    el.addEventListener('dragover',  e => { e.preventDefault(); el.classList.add('drag-target'); });
-    el.addEventListener('dragleave', ()  => el.classList.remove('drag-target'));
-    el.addEventListener('drop', e => {
-      e.preventDefault(); el.classList.remove('drag-target');
-      if (!dragId) return;
-      const p = projects.find(x=>x.id===dragId);
-      if (!p) return;
-      const t = el.dataset.dropGroup;
-      if (p.type!==t) { p.type=t; scheduleSave(); renderAll(); toast(`Moved to ${TYPES[t].label}`); }
-    });
-  });
-}
-
-// ── EXPORT ────────────────────────────────
-function exportPPTX() {
-  const code = buildScript();
-  showCodeModal(code);
-}
-
-function buildScript() {
-  const qsFull = ['Q1 2026','Q2 2026','Q3 2026','Q4 2026','Q1 2027','Q2 2027','Q3 2027','Q4 2027','Q1 2028','Q2 2028','Q3 2028','Q4 2028'];
-  const qs     = ["Q1 \'26","Q2 \'26","Q3 \'26","Q4 \'26","Q1 \'27","Q2 \'27","Q3 \'27","Q4 \'27","Q1 \'28","Q2 \'28","Q3 \'28","Q4 \'28"];
-
-  const teamsData    = JSON.stringify(TEAMS,    null, 2);
-  const typesData    = JSON.stringify(TYPES,    null, 2);
-  const projectsData = JSON.stringify(projects, null, 2);
-  const typeOrderData = JSON.stringify(Object.keys(TYPES));
-
-  return `// LongView Portfolio PPTX Generator
-// Run: node roadmap.js   (requires: npm install pptxgenjs)
-
-const pptxgen = require("pptxgenjs");
-const pres = new pptxgen();
-pres.layout = "LAYOUT_16x9";
-pres.title  = "Long View Portfolio Roadmap";
-
-const TEAMS    = ${teamsData};
-const TYPES    = ${typesData};
-const PROJECTS = ${projectsData};
-const TYPE_ORDER = ${typeOrderData};
-const QS_FULL = ${JSON.stringify(qsFull)};
-const QS      = ${JSON.stringify(qs)};
-
-const C = { navy:"16202E",navyMid:"1E2D3F",slate:"2D3E50",mid:"546070",muted:"8A9BAE",rule:"D8DDE3",light:"F3F5F7",offwhite:"EAEEF2",white:"FFFFFF",text:"2D3E50" };
-function h(c){ return (c||"BFC6CE").replace("#",""); }
-function teamColor(p){ return h((p.segments?TEAMS[p.segments[0].team]:TEAMS[p.team])?.color); }
-
-// TITLE SLIDE
-{
-  const s = pres.addSlide();
-  s.background = { color: C.navy };
-  s.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:0.18,h:5.625,fill:{color:C.navyMid},line:{color:C.navyMid}});
-  s.addText("Long View Portfolio",{x:0.55,y:0.65,w:9.2,h:1.2,fontSize:52,bold:true,fontFace:"Calibri",color:C.white});
-  s.addText("PRODUCT ROADMAP  \u00b7  2026 \u2013 2028",{x:0.55,y:1.9,w:6,h:0.36,fontSize:13,fontFace:"Calibri",color:C.muted,charSpacing:3});
-  s.addShape(pres.shapes.RECTANGLE,{x:0.55,y:2.38,w:8.9,h:0.04,fill:{color:C.slate},line:{color:C.slate}});
-  s.addText("TEAM COLOR",{x:0.55,y:2.52,w:4,h:0.22,fontSize:7.5,fontFace:"Calibri",color:C.muted,charSpacing:4});
-  Object.entries(TEAMS).forEach(([,t],i)=>{
-    const col=i%2,row=Math.floor(i/2),x=0.55+col*2.4,y=2.76+row*0.32;
-    s.addShape(pres.shapes.RECTANGLE,{x,y:y+0.08,w:0.22,h:0.14,fill:{color:h(t.color)},line:{color:h(t.color)}});
-    s.addText(t.name,{x:x+0.3,y,w:2.0,h:0.3,fontSize:9,fontFace:"Calibri",color:C.muted});
-  });
-  s.addShape(pres.shapes.RECTANGLE,{x:5.2,y:2.52,w:0.04,h:2.8,fill:{color:C.slate},line:{color:C.slate}});
-  s.addText("WORK TYPE",{x:5.4,y:2.52,w:4.2,h:0.22,fontSize:7.5,fontFace:"Calibri",color:C.muted,charSpacing:4});
-  Object.values(TYPES).forEach((t,i)=>{
-    const col=i%2,row=Math.floor(i/2),x=5.4+col*2.25,y=2.76+row*0.38;
-    s.addShape(pres.shapes.ROUNDED_RECTANGLE,{x,y:y+0.06,w:1.9,h:0.25,fill:{color:h(t.color)},line:{color:h(t.color)},rectRadius:0.05});
-    s.addText(t.label,{x,y:y+0.06,w:1.9,h:0.25,fontSize:9,bold:true,fontFace:"Calibri",color:C.white,align:"center",valign:"middle",margin:0});
-  });
-}
-
-// GANTT HELPER
-function ganttSlide(title, rows, accent) {
-  const s = pres.addSlide();
-  s.background = { color: C.light };
-  s.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:10,h:0.58,fill:{color:C.navy},line:{color:C.navy}});
-  s.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:0.18,h:0.58,fill:{color:accent||C.muted},line:{color:accent||C.muted}});
-  s.addText(title,{x:0.3,y:0.07,w:7.5,h:0.46,fontSize:19,bold:true,fontFace:"Calibri",color:C.white});
-  s.addText("2026 \u2013 2028",{x:7.8,y:0.14,w:2.0,h:0.3,fontSize:11,fontFace:"Calibri",color:C.muted,align:"right"});
-  const GX=2.68,GW=7.1,QW=GW/12,nRows=rows.length;
-  const ROW_H=Math.min(0.44,Math.max(0.18,(5.625-1.0)/Math.max(nRows,1)));
-  const TOP=1.0;
-  [0,4,8].forEach((qi,yi)=>{
-    const bgC=["1E2D3F","2D3E50","3D5060"][yi];
-    s.addShape(pres.shapes.RECTANGLE,{x:GX+qi*QW,y:0.59,w:QW*4,h:0.19,fill:{color:bgC},line:{color:C.navy,width:0.3}});
-    s.addText(QS_FULL[qi].split(" ")[1],{x:GX+qi*QW,y:0.59,w:QW*4,h:0.19,fontSize:7.5,bold:true,fontFace:"Calibri",color:C.white,align:"center",margin:0});
-  });
-  QS.forEach((q,i)=>{
-    s.addShape(pres.shapes.RECTANGLE,{x:GX+i*QW,y:0.78,w:QW,h:0.16,fill:{color:i%2===0?"E0E5EA":C.offwhite},line:{color:C.white,width:0.5}});
-    s.addText(q,{x:GX+i*QW,y:0.78,w:QW,h:0.16,fontSize:6.5,fontFace:"Calibri",color:C.mid,align:"center",margin:0});
-  });
-  s.addShape(pres.shapes.RECTANGLE,{x:0,y:0.78,w:GX,h:0.16,fill:{color:"E0E5EA"},line:{color:C.rule,width:0.3}});
-  s.addText("TYPE",{x:0.06,y:0.78,w:0.88,h:0.16,fontSize:6.5,fontFace:"Calibri",color:C.mid,align:"center",margin:0});
-  s.addText("PROJECT",{x:1.05,y:0.78,w:1.55,h:0.16,fontSize:6.5,fontFace:"Calibri",color:C.mid,margin:0});
-  for(let i=0;i<=12;i++) s.addShape(pres.shapes.LINE,{x:GX+i*QW,y:TOP-0.02,w:0,h:nRows*ROW_H+0.05,line:{color:i%4===0?"B0BCC8":C.rule,width:i%4===0?0.7:0.35}});
-  rows.forEach((p,i)=>{
-    const y=TOP+i*ROW_H;
-    s.addShape(pres.shapes.RECTANGLE,{x:0,y,w:10,h:ROW_H,fill:{color:i%2===0?C.offwhite:C.white},line:{color:C.rule,width:0.3}});
-    const tc=TYPES[p.type],pillH=Math.min(ROW_H*0.58,0.22),pillY=y+(ROW_H-pillH)/2;
-    s.addShape(pres.shapes.ROUNDED_RECTANGLE,{x:0.06,y:pillY,w:0.88,h:pillH,fill:{color:h(tc.color)},line:{color:h(tc.color)},rectRadius:0.04});
-    s.addText(tc.label,{x:0.06,y:pillY,w:0.88,h:pillH,fontSize:6.5,bold:true,fontFace:"Calibri",color:C.white,align:"center",valign:"middle",margin:0});
-    const swH=ROW_H*0.55,swY=y+(ROW_H-swH)/2;
-    s.addShape(pres.shapes.RECTANGLE,{x:1.02,y:swY,w:0.05,h:swH,fill:{color:teamColor(p)},line:{color:teamColor(p)}});
-    s.addText(p.name,{x:1.12,y,w:1.48,h:ROW_H,fontSize:ROW_H>0.38?10.5:ROW_H>0.26?9:7.5,fontFace:"Calibri",color:C.text,valign:"middle"});
-    (p.segments||[{team:p.team,start:p.start,end:p.end}]).forEach(seg=>{
-      const bx=GX+(seg.start-1)*QW+0.025,bw=(seg.end-seg.start+1)*QW-0.05;
-      const barH=ROW_H*0.56,barY=y+(ROW_H-barH)/2;
-      const tc2=h((TEAMS[seg.team]||TEAMS.unassigned).color);
-      s.addShape(pres.shapes.RECTANGLE,{x:bx,y:barY,w:bw,h:barH,fill:{color:tc2,transparency:18},line:{color:tc2,width:1.2}});
-    });
-  });
-}
-
-// OVERVIEW SLIDE (all except multi)
-{
-  const rows=PROJECTS.filter(p=>p.type!=="multi");
-  if(rows.length){
-    const s=pres.addSlide();
-    s.background={color:C.light};
-    s.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:10,h:0.5,fill:{color:C.navy},line:{color:C.navy}});
-    s.addShape(pres.shapes.RECTANGLE,{x:0,y:0,w:0.18,h:0.5,fill:{color:C.muted},line:{color:C.muted}});
-    s.addText("Full Portfolio Overview",{x:0.3,y:0.06,w:7.5,h:0.38,fontSize:17,bold:true,fontFace:"Calibri",color:C.white});
-    s.addText("2026 \u2013 2028",{x:7.8,y:0.1,w:2.0,h:0.28,fontSize:11,fontFace:"Calibri",color:C.muted,align:"right"});
-    const GX=2.08,GW=7.72,QW=GW/12,ROW_H=0.112,TOP=0.88;
-    [0,4,8].forEach((qi,yi)=>{
-      const bgC=["1E2D3F","2D3E50","3D5060"][yi];
-      s.addShape(pres.shapes.RECTANGLE,{x:GX+qi*QW,y:0.51,w:QW*4,h:0.175,fill:{color:bgC},line:{color:C.navy,width:0.3}});
-      s.addText(QS_FULL[qi].split(" ")[1],{x:GX+qi*QW,y:0.51,w:QW*4,h:0.175,fontSize:7,bold:true,fontFace:"Calibri",color:C.white,align:"center",margin:0});
-    });
-    QS.forEach((q,i)=>{
-      s.addShape(pres.shapes.RECTANGLE,{x:GX+i*QW,y:0.685,w:QW,h:0.135,fill:{color:i%2===0?"D8DDE3":C.offwhite},line:{color:C.white,width:0.4}});
-      s.addText(q,{x:GX+i*QW,y:0.685,w:QW,h:0.135,fontSize:5.5,fontFace:"Calibri",color:C.mid,align:"center",margin:0});
-    });
-    s.addShape(pres.shapes.RECTANGLE,{x:0,y:0.685,w:GX,h:0.135,fill:{color:"D8DDE3"},line:{color:C.rule,width:0.3}});
-    s.addText("PROJECT",{x:0.24,y:0.685,w:GX-0.26,h:0.135,fontSize:5.5,fontFace:"Calibri",color:C.mid,margin:0,valign:"middle"});
-    for(let i=0;i<=12;i++) s.addShape(pres.shapes.LINE,{x:GX+i*QW,y:TOP-0.01,w:0,h:rows.length*ROW_H+0.04,line:{color:i%4===0?"A8B4C0":C.rule,width:i%4===0?0.6:0.3}});
-    let lastType=null;
-    rows.forEach((p,i)=>{
-      const y=TOP+i*ROW_H,typeChanged=p.type!==lastType;lastType=p.type;
-      s.addShape(pres.shapes.RECTANGLE,{x:0,y,w:10,h:ROW_H,fill:{color:typeChanged?"E2E6EA":(i%2===0?C.offwhite:C.white)},line:{color:C.rule,width:0.2}});
-      s.addShape(pres.shapes.RECTANGLE,{x:0.02,y:y+ROW_H*0.1,w:0.08,h:ROW_H*0.8,fill:{color:h(TYPES[p.type].color)},line:{color:h(TYPES[p.type].color)}});
-      s.addShape(pres.shapes.RECTANGLE,{x:0.14,y:y+ROW_H*0.15,w:0.05,h:ROW_H*0.7,fill:{color:teamColor(p)},line:{color:teamColor(p)}});
-      s.addText(p.name,{x:0.22,y,w:GX-0.24,h:ROW_H,fontSize:6.2,fontFace:"Calibri",color:C.text,valign:"middle",margin:0});
-      (p.segments||[{team:p.team,start:p.start,end:p.end}]).forEach(seg=>{
-        const bx=GX+(seg.start-1)*QW+0.01,bw=(seg.end-seg.start+1)*QW-0.02;
-        const barH=ROW_H*0.65,barY=y+(ROW_H-barH)/2;
-        const tc2=h((TEAMS[seg.team]||TEAMS.unassigned).color);
-        s.addShape(pres.shapes.RECTANGLE,{x:bx,y:barY,w:bw,h:barH,fill:{color:tc2,transparency:15},line:{color:tc2,width:0.6}});
-      });
-    });
-  }
-}
-
-// DETAIL SLIDES
-const grouped={};
-TYPE_ORDER.forEach(t=>grouped[t]=[]);
-PROJECTS.forEach(p=>{ if(grouped[p.type]) grouped[p.type].push(p); });
-const combined=[...(grouped.acquisition||[]),...(grouped.always||[]),...(grouped.replatform||[]),...(grouped.market||[])];
-if(combined.length) ganttSlide("Replatform  \u00b7  Acquisition  \u00b7  Always On  \u00b7  Market Focus",combined,h(TYPES.replatform.color));
-const core=grouped.core||[];
-if(core.length>10){ ganttSlide("Core Features  \u00b7  Part 1 of 2",core.slice(0,Math.ceil(core.length/2)),h(TYPES.core.color)); ganttSlide("Core Features  \u00b7  Part 2 of 2",core.slice(Math.ceil(core.length/2)),h(TYPES.core.color)); }
-else if(core.length) ganttSlide("Core Features",core,h(TYPES.core.color));
-if((grouped.newprod||[]).length) ganttSlide("New Products",grouped.newprod,h(TYPES.newprod.color));
-if((grouped.multi||[]).length)   ganttSlide("Ongoing Operations",grouped.multi,C.muted);
-
-pres.writeFile({fileName:"./LongView_Export.pptx"}).then(()=>console.log("Done \u2192 LongView_Export.pptx")).catch(console.error);
-`;
-}
-
-
-
-function showCodeModal(code) {
-  document.getElementById('code-modal')?.remove();
-  const m = document.createElement('div');
-  m.id='code-modal';
-  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px';
-  m.innerHTML=`<div style="background:#1E2D3F;border:1px solid #2D3E50;border-radius:10px;width:100%;max-width:720px;max-height:82vh;display:flex;flex-direction:column;overflow:hidden">
-    <div style="padding:14px 18px;border-bottom:1px solid #2D3E50;display:flex;align-items:center;justify-content:space-between">
-      <span style="font-family:'DM Mono',monospace;font-size:11px;color:#8A9BAE;letter-spacing:.06em">GENERATED PPTX SCRIPT</span>
-      <div style="display:flex;gap:8px">
-        <button onclick="navigator.clipboard.writeText(document.getElementById('gen-code').value);this.textContent='✓ Copied!';setTimeout(()=>this.textContent='Copy',1500)"
-          style="background:#2D3E50;border:none;color:white;padding:6px 14px;border-radius:5px;cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif">Copy</button>
-        <button onclick="document.getElementById('code-modal').remove()"
-          style="background:transparent;border:1px solid #546070;color:#8A9BAE;padding:6px 14px;border-radius:5px;cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif">Close</button>
-      </div>
-    </div>
-    <div style="padding:9px 16px;background:#16202E;font-size:10px;color:#8A9BAE;font-family:'DM Mono',monospace;border-bottom:1px solid #2D3E50">
-      Save as <strong style="color:#fff">roadmap.js</strong> &nbsp;→&nbsp; run <strong style="color:#5F9EAF">node roadmap.js</strong> &nbsp;→&nbsp; opens as LongView_Export.pptx
-    </div>
-    <textarea id="gen-code" readonly style="flex:1;background:#16202E;color:#BFC6CE;font-family:'DM Mono',monospace;font-size:10.5px;padding:16px;border:none;outline:none;resize:none;line-height:1.6;min-height:280px"></textarea>
-  </div>`;
-  m.querySelector('textarea').value = code;
-  document.body.appendChild(m);
-  m.addEventListener('click', e => { if (e.target===m) m.remove(); });
+function showError(msg) {
+  document.getElementById('main-area').innerHTML = `
+    <div class="state-screen">
+      <span class="big">⚠️</span>
+      <span class="title">Couldn't load roadmap</span>
+      <span class="sub">${msg}<br><br>
+        Make sure <code>data/projects.json</code> exists in the repo and <code>GITHUB_OWNER</code> / <code>GITHUB_REPO</code> are set correctly in viewer.html.
+      </span>
+    </div>`;
+  setStatus('error', 'Error loading data');
 }
 
 // ── INIT ──────────────────────────────────
-populateSelects();
-renderAll();
-saveProjects();
+renderLegend();
+
+// Check config is filled in
+if (GITHUB_OWNER === '%%GITHUB_OWNER%%' || GITHUB_REPO === '%%GITHUB_REPO%%') {
+  showError('viewer.html is not configured yet. Replace <code>%%GITHUB_OWNER%%</code>, <code>%%GITHUB_REPO%%</code>, and <code>%%GITHUB_BRANCH%%</code> with your repo details.');
+} else {
+  loadData()
+    .then(({ projects, lastMod }) => {
+      renderGantt(projects);
+      setStatus('', 'Live');
+      if (lastMod) {
+        const d = new Date(lastMod);
+        const ua = document.getElementById('updated-at');
+        ua.style.display = '';
+        ua.textContent = 'Updated ' + d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+      }
+    })
+    .catch(e => showError(e.message));
+}
 </script>
 </body>
 </html>
