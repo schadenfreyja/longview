@@ -1,1 +1,392 @@
-[{"id":1,"name":"Dallas","team":"multiple","type":"acquisition","start":1,"end":2},{"id":3,"name":"MediaOS","team":"newsroom","type":"replatform","start":1,"end":8},{"id":4,"name":"Auth0","team":"martech","type":"replatform","start":1,"end":3},{"id":5,"name":"Chargebee","team":"martech","type":"replatform","start":2,"end":5},{"id":6,"name":"Infrastructure Revamp","team":"devops","type":"replatform","start":1,"end":4},{"id":7,"name":"2nd Surface / Video","team":"multiple","type":"core","start":1,"end":4},{"id":8,"name":"UGC / Utility / Reasons to Register","team":"multiple","type":"core","segments":[{"team":"platform","start":1,"end":4}]},{"id":9,"name":"Userjoy Foundations","team":"platform","type":"core","start":1,"end":2},{"id":10,"name":"Events (Kafka)","team":"dataEng","type":"core","start":2,"end":4},{"id":11,"name":"Metadata Enrichment","team":"dataEng","type":"core","start":2,"end":3},{"id":12,"name":"Feature Store","team":"dataEng","type":"core","start":2,"end":3},{"id":13,"name":"Personalization - Content","team":"dataEng","type":"core","start":2,"end":4},{"id":14,"name":"Personalization - Mktg Journeys","team":"dataEng","type":"core","start":2,"end":4},{"id":15,"name":"Aggregation - Content","team":"unassigned","type":"core","start":5,"end":7},{"id":16,"name":"Multivariate Testing Platform","team":"multiple","type":"core","segments":[{"team":"prodStratDis","start":3,"end":3},{"team":"dataEng","start":4,"end":5}]},{"id":17,"name":"Aggregation - Data","team":"unassigned","type":"core","start":6,"end":8},{"id":18,"name":"App Strategy","team":"prodStratDis","type":"core","start":5,"end":5},{"id":19,"name":"App Rebuild","team":"appTeam","type":"core","start":6,"end":9},{"id":20,"name":"Automated Test Coverage","team":"qa_mmow9y0f","type":"core","start":1,"end":4},{"id":21,"name":"Ad Products","team":"multiple","type":"core","segments":[{"team":"prodStratDis","start":3,"end":3},{"team":"dataEng","start":4,"end":6}]},{"id":22,"name":"Products for Agentic","team":"multiple","type":"core","segments":[{"team":"prodStratDis","start":7,"end":8},{"team":"platform","start":8,"end":12}]},{"id":23,"name":"Liquid Design System","team":"prodStratDis","type":"core","start":5,"end":7},{"id":24,"name":"CT","team":"readerExp","type":"market","start":1,"end":2},{"id":25,"name":"Property Tax Guide","team":"prodStratDev","type":"newprod","start":1,"end":2},{"id":26,"name":"Cap Con CA","team":"multiple","type":"newprod","segments":[{"team":"prodStratDev","start":1,"end":2}]},{"id":27,"name":"SFG Membership","team":"multiple","type":"newprod","segments":[{"team":"prodStratDev","start":2,"end":4},{"team":"prodStratDis","start":1,"end":1}]},{"id":28,"name":"Texas Business Product","team":"multiple","type":"newprod","segments":[{"team":"prodStratDis","start":1,"end":2},{"team":"readerExp","start":3,"end":5}]},{"id":29,"name":"Life Events","team":"multiple","type":"newprod","segments":[{"team":"prodStratDis","start":4,"end":4},{"team":"readerExp","start":5,"end":6}]},{"id":30,"name":"Restaurants / Food Maps","team":"unassigned","type":"newprod","start":7,"end":10},{"id":31,"name":"Best of Revamp","team":"unassigned","type":"newprod","start":9,"end":11},{"id":32,"name":"Listings Category Analysis","team":"unassigned","type":"newprod","start":3,"end":4},{"id":33,"name":"Product Strategy (Dev)","team":"prodStratDev","type":"multi","start":1,"end":12},{"id":34,"name":"Dev Ops","team":"devops","type":"multi","start":1,"end":12},{"id":35,"name":"Martech","team":"martech","type":"multi","start":1,"end":12},{"id":36,"name":"Newsroom Tools","team":"newsroom","type":"multi","start":1,"end":12},{"id":37,"name":"Reader Experience","team":"readerExp","type":"multi","start":1,"end":12},{"id":38,"name":"Product Strategy (Discovery)","team":"prodStratDis","type":"multi","start":1,"end":12},{"id":39,"name":"Data Engineering","team":"dataEng","type":"multi","start":1,"end":12},{"id":40,"name":"App Team (not staffed)","team":"appTeam","type":"multi","start":7,"end":12},{"id":41,"name":"Platform Team","team":"platform","type":"multi","start":1,"end":12}]
+[
+  {
+    "id": 1,
+    "name": "Dallas",
+    "team": "multiple",
+    "type": "acquisition",
+    "start": 1,
+    "end": 2
+  },
+  {
+    "id": 3,
+    "name": "MediaOS",
+    "team": "newsroom",
+    "type": "replatform",
+    "start": 1,
+    "end": 8
+  },
+  {
+    "id": 4,
+    "name": "Auth0",
+    "team": "martech",
+    "type": "replatform",
+    "start": 1,
+    "end": 3
+  },
+  {
+    "id": 5,
+    "name": "Chargebee",
+    "team": "martech",
+    "type": "replatform",
+    "start": 2,
+    "end": 8
+  },
+  {
+    "id": 6,
+    "name": "Infrastructure Revamp",
+    "team": "devops",
+    "type": "replatform",
+    "start": 1,
+    "end": 4
+  },
+  {
+    "id": 7,
+    "name": "2nd Surface / Video",
+    "team": "multiple",
+    "type": "core",
+    "start": 1,
+    "end": 4
+  },
+  {
+    "id": 8,
+    "name": "UGC / Utility / Reasons to Register",
+    "team": "multiple",
+    "type": "core",
+    "segments": [
+      {
+        "team": "platform",
+        "start": 1,
+        "end": 4
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Userjoy Foundations",
+    "team": "platform",
+    "type": "core",
+    "start": 1,
+    "end": 2
+  },
+  {
+    "id": 10,
+    "name": "Events (Kafka)",
+    "team": "dataEng",
+    "type": "core",
+    "start": 2,
+    "end": 4
+  },
+  {
+    "id": 11,
+    "name": "Metadata Enrichment",
+    "team": "dataEng",
+    "type": "core",
+    "start": 2,
+    "end": 3
+  },
+  {
+    "id": 12,
+    "name": "Feature Store",
+    "team": "dataEng",
+    "type": "core",
+    "start": 2,
+    "end": 3
+  },
+  {
+    "id": 13,
+    "name": "Personalization - Content",
+    "team": "dataEng",
+    "type": "core",
+    "start": 2,
+    "end": 4
+  },
+  {
+    "id": 14,
+    "name": "Personalization - Mktg Journeys",
+    "team": "dataEng",
+    "type": "core",
+    "start": 2,
+    "end": 4
+  },
+  {
+    "id": 15,
+    "name": "Aggregation - Content",
+    "team": "unassigned",
+    "type": "core",
+    "start": 5,
+    "end": 7
+  },
+  {
+    "id": 16,
+    "name": "Multivariate Testing Platform",
+    "team": "multiple",
+    "type": "core",
+    "segments": [
+      {
+        "team": "prodStratDis",
+        "start": 3,
+        "end": 3
+      },
+      {
+        "team": "dataEng",
+        "start": 4,
+        "end": 5
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "name": "Aggregation - Data",
+    "team": "unassigned",
+    "type": "core",
+    "start": 6,
+    "end": 8
+  },
+  {
+    "id": 18,
+    "name": "App Strategy",
+    "team": "prodStratDis",
+    "type": "core",
+    "start": 5,
+    "end": 5
+  },
+  {
+    "id": 19,
+    "name": "App Rebuild",
+    "team": "appTeam",
+    "type": "core",
+    "start": 6,
+    "end": 9
+  },
+  {
+    "id": 20,
+    "name": "Automated Test Coverage",
+    "team": "qa_mmow9y0f",
+    "type": "core",
+    "start": 1,
+    "end": 4
+  },
+  {
+    "id": 21,
+    "name": "Ad Products",
+    "team": "multiple",
+    "type": "core",
+    "segments": [
+      {
+        "team": "prodStratDis",
+        "start": 3,
+        "end": 3
+      },
+      {
+        "team": "dataEng",
+        "start": 4,
+        "end": 6
+      }
+    ]
+  },
+  {
+    "id": 22,
+    "name": "Products for Agentic",
+    "team": "multiple",
+    "type": "core",
+    "segments": [
+      {
+        "team": "prodStratDis",
+        "start": 7,
+        "end": 8
+      },
+      {
+        "team": "platform",
+        "start": 8,
+        "end": 12
+      }
+    ]
+  },
+  {
+    "id": 23,
+    "name": "Liquid Design System",
+    "team": "prodStratDis",
+    "type": "core",
+    "start": 5,
+    "end": 7
+  },
+  {
+    "id": 24,
+    "name": "CT",
+    "team": "readerExp",
+    "type": "market",
+    "start": 1,
+    "end": 2
+  },
+  {
+    "id": 25,
+    "name": "Property Tax Guide",
+    "team": "prodStratDev",
+    "type": "newprod",
+    "start": 1,
+    "end": 2
+  },
+  {
+    "id": 26,
+    "name": "Cap Con CA",
+    "team": "multiple",
+    "type": "newprod",
+    "segments": [
+      {
+        "team": "prodStratDev",
+        "start": 1,
+        "end": 2
+      }
+    ]
+  },
+  {
+    "id": 27,
+    "name": "SFG Membership",
+    "team": "multiple",
+    "type": "newprod",
+    "segments": [
+      {
+        "team": "prodStratDev",
+        "start": 2,
+        "end": 4
+      },
+      {
+        "team": "prodStratDis",
+        "start": 1,
+        "end": 1
+      }
+    ]
+  },
+  {
+    "id": 28,
+    "name": "Texas Business Product",
+    "team": "multiple",
+    "type": "newprod",
+    "segments": [
+      {
+        "team": "prodStratDis",
+        "start": 1,
+        "end": 2
+      },
+      {
+        "team": "readerExp",
+        "start": 3,
+        "end": 5
+      }
+    ]
+  },
+  {
+    "id": 29,
+    "name": "Life Events",
+    "team": "multiple",
+    "type": "newprod",
+    "segments": [
+      {
+        "team": "prodStratDis",
+        "start": 4,
+        "end": 4
+      },
+      {
+        "team": "readerExp",
+        "start": 5,
+        "end": 6
+      }
+    ]
+  },
+  {
+    "id": 30,
+    "name": "Restaurants / Food Maps",
+    "team": "unassigned",
+    "type": "newprod",
+    "start": 7,
+    "end": 10
+  },
+  {
+    "id": 31,
+    "name": "Best of Revamp",
+    "team": "unassigned",
+    "type": "newprod",
+    "start": 9,
+    "end": 11
+  },
+  {
+    "id": 32,
+    "name": "Listings Category Analysis",
+    "team": "unassigned",
+    "type": "newprod",
+    "start": 3,
+    "end": 4
+  },
+  {
+    "id": 33,
+    "name": "Product Strategy (Dev)",
+    "team": "prodStratDev",
+    "type": "multi",
+    "start": 1,
+    "end": 12
+  },
+  {
+    "id": 34,
+    "name": "Dev Ops",
+    "team": "devops",
+    "type": "multi",
+    "start": 1,
+    "end": 12
+  },
+  {
+    "id": 35,
+    "name": "Martech",
+    "team": "martech",
+    "type": "multi",
+    "start": 1,
+    "end": 12
+  },
+  {
+    "id": 36,
+    "name": "Newsroom Tools",
+    "team": "newsroom",
+    "type": "multi",
+    "start": 1,
+    "end": 12
+  },
+  {
+    "id": 37,
+    "name": "Reader Experience",
+    "team": "readerExp",
+    "type": "multi",
+    "start": 1,
+    "end": 12
+  },
+  {
+    "id": 38,
+    "name": "Product Strategy (Discovery)",
+    "team": "prodStratDis",
+    "type": "multi",
+    "start": 1,
+    "end": 12
+  },
+  {
+    "id": 39,
+    "name": "Data Engineering",
+    "team": "dataEng",
+    "type": "multi",
+    "start": 1,
+    "end": 12
+  },
+  {
+    "id": 40,
+    "name": "App Team (not staffed)",
+    "team": "appTeam",
+    "type": "multi",
+    "start": 7,
+    "end": 12
+  },
+  {
+    "id": 41,
+    "name": "Platform Team",
+    "team": "platform",
+    "type": "multi",
+    "start": 1,
+    "end": 12
+  }
+]
