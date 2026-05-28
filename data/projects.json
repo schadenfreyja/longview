@@ -49,14 +49,14 @@
   },
   {
     "id": 8,
-    "name": "UGC / Utility / Reasons to Register",
+    "name": "UGC / Utility / Community",
     "team": "multiple",
     "type": "core",
     "segments": [
       {
         "team": "platform",
         "start": 1,
-        "end": 4
+        "end": 8
       }
     ]
   },
@@ -297,7 +297,7 @@
     "id": 30,
     "name": "Restaurants / Food Maps",
     "team": "unassigned",
-    "type": "newprod",
+    "type": "core",
     "start": 7,
     "end": 10
   },
@@ -305,7 +305,7 @@
     "id": 31,
     "name": "Best of Revamp",
     "team": "unassigned",
-    "type": "newprod",
+    "type": "core",
     "start": 9,
     "end": 11
   },
@@ -313,7 +313,7 @@
     "id": 32,
     "name": "Listings Category Analysis",
     "team": "unassigned",
-    "type": "newprod",
+    "type": "core",
     "start": 3,
     "end": 4
   },
@@ -388,5 +388,29 @@
     "type": "multi",
     "start": 1,
     "end": 12
+  },
+  {
+    "id": 42,
+    "name": "People, Places & Things Foundations",
+    "type": "core",
+    "team": "platform",
+    "start": 3,
+    "end": 4
+  },
+  {
+    "id": 43,
+    "name": "Topics, People & Places",
+    "type": "core",
+    "team": "platform",
+    "start": 3,
+    "end": 8
+  },
+  {
+    "id": 44,
+    "name": "SeattlePI",
+    "type": "newprod",
+    "team": "multiple",
+    "start": 3,
+    "end": 8
   }
 ]
