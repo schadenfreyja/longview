@@ -147,8 +147,8 @@
     "name": "App Strategy",
     "team": "prodStratDis",
     "type": "core",
-    "start": 5,
-    "end": 5
+    "start": 4,
+    "end": 4
   },
   {
     "id": 19,
@@ -258,26 +258,8 @@
     ]
   },
   {
-    "id": 28,
-    "name": "Texas Business Product",
-    "team": "multiple",
-    "type": "newprod",
-    "segments": [
-      {
-        "team": "prodStratDis",
-        "start": 1,
-        "end": 2
-      },
-      {
-        "team": "readerExp",
-        "start": 3,
-        "end": 5
-      }
-    ]
-  },
-  {
     "id": 29,
-    "name": "Life Events",
+    "name": "Announcements",
     "team": "multiple",
     "type": "newprod",
     "segments": [
@@ -308,14 +290,6 @@
     "type": "core",
     "start": 9,
     "end": 11
-  },
-  {
-    "id": 32,
-    "name": "Listings Category Analysis",
-    "team": "unassigned",
-    "type": "core",
-    "start": 3,
-    "end": 4
   },
   {
     "id": 33,
@@ -391,7 +365,7 @@
   },
   {
     "id": 42,
-    "name": "People, Places & Things Foundations",
+    "name": "LocalJoy",
     "type": "core",
     "team": "platform",
     "start": 3,
